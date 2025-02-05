@@ -8,10 +8,7 @@ export interface Question {
     blank: string;
     afterBlank: string;
   };
-  dragAndDropData?: {
-    segments: string[];
-    correctOrder: number[];
-  };
+  dragAndDropData?: import('./questionTypes').DragAndDropAnswer;
 }
 
 export interface LordsDay {
