@@ -1,3 +1,4 @@
+
 import { ChevronRight } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { Navigation } from "@/components/Navigation";
@@ -23,21 +24,23 @@ const Index = () => {
     return () => subscription.unsubscribe();
   }, []);
 
-  const handleStartLearning = () => {
+  const handleStartLearning = async () => {
+    console.log("Start Learning clicked");
+    
     if (!userId) {
       console.log("User not logged in, redirecting to auth...");
-      navigate("/auth", { state: { from: "/lords-day/1" } });
+      navigate("/auth");
       toast("Please sign in to start learning");
-    } else {
-      try {
-        console.log("User logged in, attempting navigation to /lords-day/1");
-        navigate("/lords-day/1", { replace: true });
-        console.log("Navigation completed");
-        toast.success("Starting with Lord's Day 1");
-      } catch (error) {
-        console.error("Navigation failed:", error);
-        toast.error("Failed to navigate to Lord's Day 1");
-      }
+      return;
+    }
+
+    try {
+      console.log("User logged in, navigating to /lords-day/1");
+      navigate("/lords-day/1");
+      toast.success("Starting with Lord's Day 1");
+    } catch (error) {
+      console.error("Navigation failed:", error);
+      toast.error("Failed to start learning");
     }
   };
 
