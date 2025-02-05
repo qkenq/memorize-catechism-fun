@@ -25,12 +25,19 @@ const Index = () => {
 
   const handleStartLearning = () => {
     if (!userId) {
+      console.log("User not logged in, redirecting to auth...");
       navigate("/auth", { state: { from: "/lords-day/1" } });
       toast("Please sign in to start learning");
     } else {
-      console.log("Navigating to Lord's Day 1...");
-      navigate("/lords-day/1");
-      toast.success("Starting with Lord's Day 1");
+      try {
+        console.log("User logged in, attempting navigation to /lords-day/1");
+        navigate("/lords-day/1", { replace: true });
+        console.log("Navigation completed");
+        toast.success("Starting with Lord's Day 1");
+      } catch (error) {
+        console.error("Navigation failed:", error);
+        toast.error("Failed to navigate to Lord's Day 1");
+      }
     }
   };
 
