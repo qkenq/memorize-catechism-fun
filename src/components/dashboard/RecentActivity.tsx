@@ -3,7 +3,7 @@ import { BookOpen, Clock } from "lucide-react";
 import { Card } from "@/components/ui/card";
 
 interface ActivityItem {
-  id: number;
+  id: string;  // Changed from number to string to match Supabase's UUID type
   lordsDayTitle: string;
   score: number;
   total_time_spent: number | null;
