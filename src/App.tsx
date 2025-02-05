@@ -62,7 +62,7 @@ function App() {
           <Routes>
             <Route path="/" element={<Index />} />
             <Route path="/lords-days" element={<LordsDays />} />
-            <Route path="/lords-day/:id" element={<LordsDay />} />
+            <Route path="/lords-days/:id" element={<LordsDay />} />
             <Route path="/leaderboard" element={<Leaderboard />} />
             <Route path="/auth" element={<Auth />} />
             <Route path="*" element={<NotFound />} />
