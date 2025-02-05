@@ -7,9 +7,9 @@ export interface FillInBlankAnswer {
 }
 
 export interface DragAndDropAnswer {
-  visibleParts: string[];  // The 2/3 visible portions of each sentence
-  segments: string[];      // The 1/3 gap portions to be dragged
+  segments: string[];      // The portions to be dragged
   correctOrder: number[];  // The correct order of the segments
+  visibleParts?: string[]; // Made optional with ?
 }
 
 export interface Question {
