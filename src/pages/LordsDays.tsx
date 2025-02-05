@@ -1,29 +1,59 @@
 
+import { useEffect, useState } from "react";
 import { Navigation } from "@/components/Navigation";
 import { catechism } from "@/data/catechism";
 import { ChevronRight } from "lucide-react";
-import { Link } from "react-router-dom";
+import { Link, Navigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 
 const LordsDays = () => {
+  const [userId, setUserId] = useState<string | null>(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      setUserId(session?.user?.id || null);
+      setLoading(false);
+    });
+
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange((_event, session) => {
+      setUserId(session?.user?.id || null);
+    });
+
+    return () => subscription.unsubscribe();
+  }, []);
+
   const { data: progress } = useQuery({
     queryKey: ['progress'],
     queryFn: async () => {
+      if (!userId) return [];
       const { data, error } = await supabase
         .from('progress')
-        .select('*');
+        .select('*')
+        .eq('user_id', userId);
       
       if (error) throw error;
       return data || [];
-    }
+    },
+    enabled: !!userId,
   });
+
+  if (loading) {
+    return <div>Loading...</div>;
+  }
+
+  if (!userId) {
+    return <Navigate to="/auth" state={{ from: "/lords-days" }} replace />;
+  }
 
   const getProgressForLordsDay = (lordsDayId: number) => {
     if (!progress) return null;
-    return progress.filter(p => p.lords_day_id === lordsDayId);
+    return progress.find(p => p.lords_day_id === lordsDayId);
   };
 
   return (
@@ -40,8 +70,7 @@ const LordsDays = () => {
             {catechism.map((lordsDay) => {
               const lordsDayProgress = getProgressForLordsDay(lordsDay.id);
               const totalQuestions = lordsDay.questions.length;
-              const completedQuestions = lordsDayProgress?.length || 0;
-              const progressPercentage = (completedQuestions / totalQuestions) * 100;
+              const progressPercentage = lordsDayProgress ? (lordsDayProgress.score || 0) : 0;
 
               return (
                 <Card 
@@ -88,3 +117,4 @@ const LordsDays = () => {
 };
 
 export default LordsDays;
+

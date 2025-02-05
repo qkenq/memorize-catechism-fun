@@ -1,23 +1,37 @@
-
 import { ChevronRight } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { Navigation } from "@/components/Navigation";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
+import { useEffect, useState } from "react";
+import { supabase } from "@/integrations/supabase/client";
 
 const Index = () => {
   const navigate = useNavigate();
-  console.log("Index component rendered, navigate function:", !!navigate); // Debug log
+  const [userId, setUserId] = useState<string | null>(null);
+
+  useEffect(() => {
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      setUserId(session?.user?.id || null);
+    });
+
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange((_event, session) => {
+      setUserId(session?.user?.id || null);
+    });
+
+    return () => subscription.unsubscribe();
+  }, []);
 
   const handleStartLearning = () => {
     console.log("Start Learning clicked");
-    try {
-      console.log("Attempting navigation to /lords-days/1");
+    if (!userId) {
+      navigate("/auth", { state: { from: "/lords-days/1" } });
+      toast("Please sign in to start learning");
+    } else {
       navigate("/lords-days/1");
       toast.success("Starting with Lord's Day 1");
-    } catch (error) {
-      console.error("Navigation error:", error);
-      toast.error("Something went wrong. Please try again.");
     }
   };
 
