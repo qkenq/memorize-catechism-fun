@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { Navigate } from "react-router-dom";
+import { Navigate, useLocation } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -14,6 +14,10 @@ const Auth = () => {
   const [isSignUp, setIsSignUp] = useState(false);
   const [session, setSession] = useState<any>(null);
   const { toast } = useToast();
+  const location = useLocation();
+
+  // If user came from somewhere else, store that location
+  const from = location.state?.from?.pathname || "/";
 
   useEffect(() => {
     // Get initial session
@@ -31,8 +35,9 @@ const Auth = () => {
     return () => subscription.unsubscribe();
   }, []);
 
+  // If user is already logged in, redirect them back to where they came from
   if (session) {
-    return <Navigate to="/dashboard" replace />;
+    return <Navigate to={from} replace />;
   }
 
   const handleAuth = async (e: React.FormEvent) => {
