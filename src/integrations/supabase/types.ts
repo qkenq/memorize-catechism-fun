@@ -72,25 +72,31 @@ export type Database = {
         Row: {
           completed_at: string
           id: string
+          last_attempt_date: string | null
           level: number
           lords_day_id: number
           score: number
+          total_time_spent: number | null
           user_id: string
         }
         Insert: {
           completed_at?: string
           id?: string
+          last_attempt_date?: string | null
           level?: number
           lords_day_id: number
           score?: number
+          total_time_spent?: number | null
           user_id: string
         }
         Update: {
           completed_at?: string
           id?: string
+          last_attempt_date?: string | null
           level?: number
           lords_day_id?: number
           score?: number
+          total_time_spent?: number | null
           user_id?: string
         }
         Relationships: []
