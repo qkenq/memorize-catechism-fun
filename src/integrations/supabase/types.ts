@@ -29,30 +29,39 @@ export type Database = {
       }
       profiles: {
         Row: {
+          age: number | null
           church_id: string | null
           created_at: string
+          display_name: string | null
           id: string
           last_activity_date: string | null
+          level: number | null
           role: Database["public"]["Enums"]["app_role"]
           streak_days: number
           username: string | null
           xp: number
         }
         Insert: {
+          age?: number | null
           church_id?: string | null
           created_at?: string
+          display_name?: string | null
           id: string
           last_activity_date?: string | null
+          level?: number | null
           role?: Database["public"]["Enums"]["app_role"]
           streak_days?: number
           username?: string | null
           xp?: number
         }
         Update: {
+          age?: number | null
           church_id?: string | null
           created_at?: string
+          display_name?: string | null
           id?: string
           last_activity_date?: string | null
+          level?: number | null
           role?: Database["public"]["Enums"]["app_role"]
           streak_days?: number
           username?: string | null
