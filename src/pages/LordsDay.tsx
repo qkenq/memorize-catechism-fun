@@ -20,7 +20,9 @@ const LordsDay = () => {
   const [selfScore, setSelfScore] = useState<number>(0);
   const [isCompleted, setIsCompleted] = useState(false);
 
+  // Find the Lord's Day data based on the ID parameter
   const lordsDay = catechism.find(day => day.id === Number(id));
+  console.log("Lords Day data:", lordsDay); // Debug log
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data: { session } }) => {
@@ -48,14 +50,17 @@ const LordsDay = () => {
   });
 
   if (!lordsDay) {
+    console.log("No Lords Day found for ID:", id); // Debug log
     return <Navigate to="/lords-days" replace />;
   }
 
   if (!userId) {
+    console.log("No user ID found"); // Debug log
     return <Navigate to="/auth" replace />;
   }
 
   const currentQuestion = lordsDay.questions[currentQuestionIndex];
+  console.log("Current question:", currentQuestion); // Debug log
   
   const handleSelfScore = async (understood: boolean) => {
     const score = understood ? 100 : 50;
