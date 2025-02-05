@@ -21,6 +21,9 @@ import { useQuery } from "@tanstack/react-query";
 
 const formSchema = z.object({
   name: z.string().min(2, "Name must be at least 2 characters"),
+  age: z.number().min(13, "You must be at least 13 years old").max(120, "Invalid age"),
+  level: z.number().min(1).max(3),
+  display_name: z.string().min(2, "Display name must be at least 2 characters"),
 });
 
 const Profile = () => {
@@ -54,6 +57,9 @@ const Profile = () => {
     resolver: zodResolver(formSchema),
     defaultValues: {
       name: profile?.username || "",
+      age: profile?.age || undefined,
+      level: profile?.level || 1,
+      display_name: profile?.display_name || "",
     },
   });
 
@@ -67,6 +73,9 @@ const Profile = () => {
         .upsert({
           id: userId,
           username: values.name,
+          age: values.age,
+          level: values.level,
+          display_name: values.display_name,
         });
 
       if (error) throw error;
@@ -100,9 +109,63 @@ const Profile = () => {
                 name="name"
                 render={({ field }) => (
                   <FormItem>
+                    <FormLabel>Username</FormLabel>
+                    <FormControl>
+                      <Input placeholder="Your username" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name="display_name"
+                render={({ field }) => (
+                  <FormItem>
                     <FormLabel>Display Name</FormLabel>
                     <FormControl>
                       <Input placeholder="Your display name" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name="age"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Age</FormLabel>
+                    <FormControl>
+                      <Input 
+                        type="number" 
+                        placeholder="Your age" 
+                        {...field}
+                        onChange={(e) => field.onChange(Number(e.target.value))}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name="level"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Level</FormLabel>
+                    <FormControl>
+                      <Input 
+                        type="number" 
+                        min={1} 
+                        max={3} 
+                        placeholder="Your level (1-3)" 
+                        {...field}
+                        onChange={(e) => field.onChange(Number(e.target.value))}
+                      />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
