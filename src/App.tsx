@@ -69,7 +69,7 @@ function App() {
             <Route path="/leaderboard" element={<Leaderboard />} />
             <Route path="/auth" element={<Auth />} />
             
-            {/* Protected routes */}
+            {/* Protected routes - only Dashboard requires authentication */}
             <Route
               path="/dashboard"
               element={
