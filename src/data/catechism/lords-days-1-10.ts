@@ -53,8 +53,8 @@ export const lordsDays1To10: LordsDay[] = [
           ],
           correctOrder: [0, 1, 2]
         }
-      },
-    ],
+      }
+    ]
   },
   {
     id: 2,

@@ -26,10 +26,8 @@ export const QuestionCard = ({
   const [completedFillInBlank, setCompletedFillInBlank] = useState(false);
   const [interactiveScore, setInteractiveScore] = useState<boolean | null>(null);
 
-  // Only show interactive questions for level 1
   const shouldBeInteractive = userLevel === 1;
   
-  // Use the question type from the data if available, otherwise use the default logic
   const questionType = question.type || (shouldBeInteractive 
     ? (!completedFillInBlank ? 'fillInBlank' : 'dragAndDrop')
     : 'standard');
@@ -42,7 +40,6 @@ export const QuestionCard = ({
     onSelfScore(isCorrect);
   };
 
-  // Split answer into segments (2/3 visible, 1/3 interactive)
   const prepareAnswerSegments = () => {
     if (question.dragAndDropData) {
       return question.dragAndDropData;
@@ -65,8 +62,9 @@ export const QuestionCard = ({
     } else if (questionType === 'dragAndDrop') {
       const sentences = question.answer.split(/(?<=[.]) /).filter(s => s.trim());
       const dragAndDropAnswer: DragAndDropAnswer = {
-        segments: sentences.map(s => s.trim()),
-        correctOrder: Array.from({ length: sentences.length }, (_, i) => i)
+        visibleParts: sentences.slice(0, Math.ceil(sentences.length * (2/3))).map(s => s.trim()),
+        segments: sentences.slice(Math.ceil(sentences.length * (2/3))).map(s => s.trim()),
+        correctOrder: Array.from({ length: sentences.length - Math.ceil(sentences.length * (2/3)) }, (_, i) => i)
       };
       return dragAndDropAnswer;
     }
