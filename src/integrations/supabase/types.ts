@@ -9,7 +9,92 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
-      [_ in never]: never
+      churches: {
+        Row: {
+          created_at: string
+          id: string
+          name: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          name: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          name?: string
+        }
+        Relationships: []
+      }
+      profiles: {
+        Row: {
+          church_id: string | null
+          created_at: string
+          id: string
+          last_activity_date: string | null
+          role: Database["public"]["Enums"]["app_role"]
+          streak_days: number
+          username: string | null
+          xp: number
+        }
+        Insert: {
+          church_id?: string | null
+          created_at?: string
+          id: string
+          last_activity_date?: string | null
+          role?: Database["public"]["Enums"]["app_role"]
+          streak_days?: number
+          username?: string | null
+          xp?: number
+        }
+        Update: {
+          church_id?: string | null
+          created_at?: string
+          id?: string
+          last_activity_date?: string | null
+          role?: Database["public"]["Enums"]["app_role"]
+          streak_days?: number
+          username?: string | null
+          xp?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "profiles_church_id_fkey"
+            columns: ["church_id"]
+            isOneToOne: false
+            referencedRelation: "churches"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      progress: {
+        Row: {
+          completed_at: string
+          id: string
+          level: number
+          lords_day_id: number
+          score: number
+          user_id: string
+        }
+        Insert: {
+          completed_at?: string
+          id?: string
+          level?: number
+          lords_day_id: number
+          score?: number
+          user_id: string
+        }
+        Update: {
+          completed_at?: string
+          id?: string
+          level?: number
+          lords_day_id?: number
+          score?: number
+          user_id?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
@@ -18,7 +103,7 @@ export type Database = {
       [_ in never]: never
     }
     Enums: {
-      [_ in never]: never
+      app_role: "admin" | "member"
     }
     CompositeTypes: {
       [_ in never]: never
