@@ -8,7 +8,7 @@ const Index = () => {
   const navigate = useNavigate();
 
   const handleStartLearning = () => {
-    console.log("Start Learning clicked"); // Debug log
+    console.log("Start Learning clicked");
     try {
       navigate("/lords-days/1");
       toast.success("Starting with Lord's Day 1");
