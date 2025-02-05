@@ -11,7 +11,8 @@ const Index = () => {
   const navigate = useNavigate();
 
   const handleStartLearning = () => {
-    navigate('/lords-days/1');
+    console.log("Navigation triggered"); // Debug log
+    navigate("/lords-days/1");
   };
 
   return (
@@ -27,9 +28,10 @@ const Index = () => {
             <p className="text-lg md:text-xl text-brand-600 mb-8">
               An interactive platform to help you learn and remember these timeless truths.
             </p>
-            <Button
+            <Button 
               onClick={handleStartLearning}
-              className="inline-flex items-center px-6 py-3 text-lg font-medium"
+              size="lg"
+              className="text-lg"
             >
               Start Learning
               <ChevronRight className="ml-2" size={20} />
