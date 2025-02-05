@@ -1,6 +1,7 @@
 import { ChevronRight } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
 import { Navigation } from "@/components/Navigation";
+import { Button } from "@/components/ui/button";
 
 interface FeatureIconProps {
   className?: string;
@@ -26,13 +27,13 @@ const Index = () => {
             <p className="text-lg md:text-xl text-brand-600 mb-8">
               An interactive platform to help you learn and remember these timeless truths.
             </p>
-            <button
+            <Button
               onClick={handleStartLearning}
-              className="inline-flex items-center px-6 py-3 text-lg font-medium text-white bg-sage-600 rounded-lg hover:bg-sage-700 transition-colors"
+              className="inline-flex items-center px-6 py-3 text-lg font-medium"
             >
               Start Learning
               <ChevronRight className="ml-2" size={20} />
-            </button>
+            </Button>
           </div>
 
           <div className="grid md:grid-cols-3 gap-8 mb-16">
