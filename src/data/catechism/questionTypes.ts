@@ -11,11 +11,11 @@ export interface DragAndDropAnswer {
   correctOrder: number[];
 }
 
-export interface EnhancedQuestion {
+export interface Question {
   id: number;
   question: string;
   answer: string;
-  type: QuestionType;
+  type?: QuestionType;
   fillInBlankData?: FillInBlankAnswer;
   dragAndDropData?: DragAndDropAnswer;
 }

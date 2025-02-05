@@ -1,5 +1,14 @@
 import { LordsDay } from './types';
 
+const splitIntoSegments = (answer: string): { segments: string[]; correctOrder: number[] } => {
+  const sentences = answer.split(/(?<=[.]) /).filter(s => s.trim());
+  const segments = sentences.map(sentence => sentence.trim());
+  return {
+    segments,
+    correctOrder: Array.from({ length: segments.length }, (_, i) => i)
+  };
+};
+
 export const lordsDays1To10: LordsDay[] = [
   {
     id: 1,
@@ -9,11 +18,15 @@ export const lordsDays1To10: LordsDay[] = [
         id: 1,
         question: "What is your only comfort in life and death?",
         answer: "That I am not my own, but belong with body and soul, both in life and in death, to my faithful Savior Jesus Christ. He has fully paid for all my sins with his precious blood and has set me free from all the power of the devil. He also preserves me in such a way that without the will of my heavenly Father not a hair can fall from my head; indeed, all things must work together for my salvation. Therefore, by his Holy Spirit he also assures me of eternal life and makes me heartily willing and ready from now on to live for him.",
+        type: "dragAndDrop",
+        dragAndDropData: splitIntoSegments("That I am not my own, but belong with body and soul, both in life and in death, to my faithful Savior Jesus Christ. He has fully paid for all my sins with his precious blood and has set me free from all the power of the devil. He also preserves me in such a way that without the will of my heavenly Father not a hair can fall from my head; indeed, all things must work together for my salvation. Therefore, by his Holy Spirit he also assures me of eternal life and makes me heartily willing and ready from now on to live for him.")
       },
       {
         id: 2,
         question: "What do you need to know in order to live and die in the joy of this comfort?",
         answer: "First, how great my sins and misery are; Second, how I am delivered from all my sins and misery; Third, how I am to be thankful to God for such deliverance.",
+        type: "dragAndDrop",
+        dragAndDropData: splitIntoSegments("First, how great my sins and misery are. Second, how I am delivered from all my sins and misery. Third, how I am to be thankful to God for such deliverance.")
       },
     ],
   },
@@ -25,16 +38,22 @@ export const lordsDays1To10: LordsDay[] = [
         id: 3,
         question: "From where do you know your sins and misery?",
         answer: "From the law of God.",
+        type: "dragAndDrop",
+        dragAndDropData: splitIntoSegments("From the law of God.")
       },
       {
         id: 4,
         question: "What does God's law require of us?",
         answer: "Christ teaches us this in a summary in Matthew 22: Love the Lord your God with all your heart and with all your soul and with all your mind. This is the first and greatest commandment. And the second is like it: Love your neighbor as yourself. All the Law and the Prophets hang on these two commandments.",
+        type: "dragAndDrop",
+        dragAndDropData: splitIntoSegments("Christ teaches us this in a summary in Matthew 22: Love the Lord your God with all your heart and with all your soul and with all your mind. This is the first and greatest commandment. And the second is like it: Love your neighbor as yourself. All the Law and the Prophets hang on these two commandments.")
       },
       {
         id: 5,
         question: "Can you keep all this perfectly?",
         answer: "No, I am inclined by nature to hate God and my neighbor.",
+        type: "dragAndDrop",
+        dragAndDropData: splitIntoSegments("No, I am inclined by nature to hate God and my neighbor.")
       },
     ],
   },
