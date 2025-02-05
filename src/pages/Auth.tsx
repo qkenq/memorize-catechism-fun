@@ -16,16 +16,13 @@ const Auth = () => {
   const { toast } = useToast();
   const location = useLocation();
 
-  // If user came from somewhere else, store that location
   const from = location.state?.from?.pathname || "/";
 
   useEffect(() => {
-    // Get initial session
     supabase.auth.getSession().then(({ data: { session } }) => {
       setSession(session);
     });
 
-    // Listen for auth changes
     const {
       data: { subscription },
     } = supabase.auth.onAuthStateChange((_event, session) => {
@@ -35,7 +32,6 @@ const Auth = () => {
     return () => subscription.unsubscribe();
   }, []);
 
-  // If user is already logged in, redirect them back to where they came from
   if (session) {
     return <Navigate to={from} replace />;
   }
@@ -76,47 +72,39 @@ const Auth = () => {
 
   const loginWithTestAccount = async () => {
     setLoading(true);
+    const testEmail = "test@example.com";
+    const testPassword = "test123456";
+
     try {
-      const { error } = await supabase.auth.signInWithPassword({
-        email: "test@example.com",
-        password: "test123456",
+      // First, try to create the account
+      const { error: signUpError } = await supabase.auth.signUp({
+        email: testEmail,
+        password: testPassword,
       });
 
-      if (error) throw error;
+      // If there's an error but it's not because the user already exists, throw it
+      if (signUpError && !signUpError.message.includes("User already registered")) {
+        throw signUpError;
+      }
+
+      // Now try to sign in
+      const { error: signInError } = await supabase.auth.signInWithPassword({
+        email: testEmail,
+        password: testPassword,
+      });
+
+      if (signInError) throw signInError;
 
       toast({
         title: "Welcome!",
         description: "You have been signed in with the test account.",
       });
     } catch (error: any) {
-      // If the test account doesn't exist, create it
-      if (error.message.includes("Invalid login credentials")) {
-        try {
-          const { error: signUpError } = await supabase.auth.signUp({
-            email: "test@example.com",
-            password: "test123456",
-          });
-
-          if (signUpError) throw signUpError;
-
-          toast({
-            title: "Test Account Created",
-            description: "The test account has been created and you're now signed in.",
-          });
-        } catch (signUpError: any) {
-          toast({
-            title: "Error",
-            description: signUpError.message,
-            variant: "destructive",
-          });
-        }
-      } else {
-        toast({
-          title: "Error",
-          description: error.message,
-          variant: "destructive",
-        });
-      }
+      toast({
+        title: "Error",
+        description: error.message,
+        variant: "destructive",
+      });
     } finally {
       setLoading(false);
     }
