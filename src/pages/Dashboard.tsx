@@ -1,6 +1,6 @@
 
 import { useEffect, useState } from "react";
-import { Navigate } from "react-router-dom";
+import { Navigate, Link } from "react-router-dom";
 import { Navigation } from "@/components/Navigation";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
@@ -8,7 +8,9 @@ import { Card } from "@/components/ui/card";
 import { useToast } from "@/components/ui/use-toast";
 import { Session } from "@supabase/supabase-js";
 import { useQuery } from "@tanstack/react-query";
-import { Trophy, Flame, Calendar } from "lucide-react";
+import { Trophy, Flame, Calendar, BookOpen, ArrowRight } from "lucide-react";
+import { Progress } from "@/components/ui/progress";
+import { catechism } from "@/data/catechism";
 
 const Dashboard = () => {
   const [session, setSession] = useState<Session | null>(null);
@@ -45,6 +47,20 @@ const Dashboard = () => {
     enabled: !!session?.user?.id,
   });
 
+  const { data: progressData } = useQuery({
+    queryKey: ['progress', session?.user?.id],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('progress')
+        .select('*')
+        .eq('user_id', session?.user?.id);
+      
+      if (error) throw error;
+      return data || [];
+    },
+    enabled: !!session?.user?.id,
+  });
+
   const handleSignOut = async () => {
     const { error } = await supabase.auth.signOut();
     if (error) {
@@ -64,6 +80,15 @@ const Dashboard = () => {
     if (!date) return 'No activity yet';
     return new Date(date).toLocaleDateString();
   };
+
+  const calculateOverallProgress = () => {
+    if (!progressData) return 0;
+    const totalQuestions = catechism.reduce((acc, day) => acc + day.questions.length, 0);
+    const completedQuestions = progressData.length;
+    return Math.round((completedQuestions / totalQuestions) * 100);
+  };
+
+  const progressPercentage = calculateOverallProgress();
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-brand-50 to-white">
@@ -117,6 +142,28 @@ const Dashboard = () => {
               </div>
             </Card>
           </div>
+
+          <Card className="p-6 mb-8" asChild>
+            <Link to="/lords-days" className="block hover:shadow-md transition-shadow">
+              <div className="space-y-4">
+                <div className="flex justify-between items-center">
+                  <div className="flex items-center gap-4">
+                    <div className="p-3 bg-brand-100 rounded-full">
+                      <BookOpen className="w-6 h-6 text-brand-600" />
+                    </div>
+                    <div>
+                      <h2 className="text-xl font-semibold text-brand-800">Overall Progress</h2>
+                      <p className="text-sm text-brand-600">
+                        {progressPercentage}% Complete
+                      </p>
+                    </div>
+                  </div>
+                  <ArrowRight className="w-5 h-5 text-brand-600" />
+                </div>
+                <Progress value={progressPercentage} className="h-2" />
+              </div>
+            </Link>
+          </Card>
 
           <Card className="p-6">
             <h2 className="text-xl font-semibold text-brand-800 mb-4">Recent Activity</h2>
