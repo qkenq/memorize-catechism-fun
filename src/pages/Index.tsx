@@ -1,3 +1,4 @@
+
 import { ChevronRight } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { Navigation } from "@/components/Navigation";
@@ -6,10 +7,12 @@ import { toast } from "sonner";
 
 const Index = () => {
   const navigate = useNavigate();
+  console.log("Index component rendered, navigate function:", !!navigate); // Debug log
 
   const handleStartLearning = () => {
     console.log("Start Learning clicked");
     try {
+      console.log("Attempting navigation to /lords-days/1");
       navigate("/lords-days/1");
       toast.success("Starting with Lord's Day 1");
     } catch (error) {
