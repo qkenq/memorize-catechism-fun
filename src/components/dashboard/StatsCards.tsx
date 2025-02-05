@@ -57,7 +57,7 @@ export const StatsCards = ({ xp, streakDays, averageScore }: StatsCardsProps) =>
             <p className="text-2xl font-bold text-brand-900">{averageScore}%</p>
           </div>
         </div>
-      </div>
+      </Card>
     </div>
   );
 };
