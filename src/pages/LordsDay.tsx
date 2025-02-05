@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { useParams, Navigate } from "react-router-dom";
 import { Navigation } from "@/components/Navigation";
@@ -55,6 +54,22 @@ const LordsDay = () => {
       return data;
     },
     enabled: !!userId && !!id,
+  });
+
+  const { data: userProfile } = useQuery({
+    queryKey: ['profile', userId],
+    queryFn: async () => {
+      if (!userId) return null;
+      const { data, error } = await supabase
+        .from('profiles')
+        .select('*')
+        .eq('id', userId)
+        .single();
+      
+      if (error) throw error;
+      return data;
+    },
+    enabled: !!userId,
   });
 
   // Show loading state
@@ -155,6 +170,7 @@ const LordsDay = () => {
               showAnswer={showAnswer}
               onShowAnswer={() => setShowAnswer(true)}
               onSelfScore={handleSelfScore}
+              userLevel={userProfile?.level || 1}
             />
           ) : (
             <CompletionCard onStudyAgain={handleStudyAgain} />
