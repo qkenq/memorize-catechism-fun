@@ -1,5 +1,5 @@
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useParams, Navigate } from "react-router-dom";
 import { Navigation } from "@/components/Navigation";
 import { catechism } from "@/data/catechism";
@@ -14,8 +14,18 @@ const LordsDay = () => {
   const { toast } = useToast();
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
   const [showAnswer, setShowAnswer] = useState(false);
+  const [userId, setUserId] = useState<string | null>(null);
 
   const lordsDay = catechism.find(day => day.id === Number(id));
+
+  useEffect(() => {
+    // Get the current user's ID
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      if (session) {
+        setUserId(session.user.id);
+      }
+    });
+  }, []);
 
   const { data: progress, refetch: refetchProgress } = useQuery({
     queryKey: ['progress', id],
@@ -23,7 +33,7 @@ const LordsDay = () => {
       const { data, error } = await supabase
         .from('progress')
         .select('*')
-        .eq('lords_day_id', id);
+        .eq('lords_day_id', Number(id));
       
       if (error) throw error;
       return data || [];
@@ -32,6 +42,10 @@ const LordsDay = () => {
 
   if (!lordsDay) {
     return <Navigate to="/lords-days" replace />;
+  }
+
+  if (!userId) {
+    return <Navigate to="/auth" replace />;
   }
 
   const currentQuestion = lordsDay.questions[currentQuestionIndex];
@@ -44,6 +58,7 @@ const LordsDay = () => {
         lords_day_id: lordsDay.id,
         score: showAnswer ? 100 : 50, // Simple scoring for now
         level: 1,
+        user_id: userId
       });
 
     if (error) {
@@ -117,3 +132,4 @@ const LordsDay = () => {
 };
 
 export default LordsDay;
+
