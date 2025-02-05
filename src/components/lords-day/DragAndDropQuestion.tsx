@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import type { DragAndDropAnswer } from "@/data/catechism/questionTypes";
-import { DragHandleDots2Icon } from "@radix-ui/react-icons";
+import { GripVertical } from "lucide-react";
 
 interface DragAndDropQuestionProps {
   question: string;
@@ -44,7 +44,7 @@ export const DragAndDropQuestion = ({
             key={segment}
             className="flex items-center gap-2 p-3 bg-white border rounded-lg shadow-sm"
           >
-            <DragHandleDots2Icon className="h-5 w-5 text-gray-400" />
+            <GripVertical className="h-5 w-5 text-gray-400" />
             <span>{segment}</span>
             <div className="flex gap-2 ml-auto">
               {index > 0 && (
