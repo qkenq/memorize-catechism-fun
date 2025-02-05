@@ -66,8 +66,8 @@ const Profile = () => {
     resolver: zodResolver(formSchema),
     defaultValues: {
       name: profile?.username || "",
-      age: profile?.age?.toString() || "",
-      level: profile?.level?.toString() || "1",
+      age: "",
+      level: "1",
     },
   });
 
@@ -81,8 +81,6 @@ const Profile = () => {
         .upsert({
           id: userId,
           username: values.name,
-          age: parseInt(values.age),
-          level: parseInt(values.level),
         });
 
       if (error) throw error;
