@@ -10,7 +10,6 @@ const Index = () => {
   const navigate = useNavigate();
 
   const handleStartLearning = () => {
-    // Navigate to Lord's Day 1 directly
     navigate('/lords-days/1');
   };
 
