@@ -6,6 +6,7 @@ import { AnswerSection } from "./AnswerSection";
 import { FillInBlankQuestion } from "./FillInBlankQuestion";
 import { DragAndDropQuestion } from "./DragAndDropQuestion";
 import { useState } from "react";
+import type { FillInBlankAnswer, DragAndDropAnswer } from "@/data/catechism/questionTypes";
 
 interface QuestionCardProps {
   question: Question;
@@ -47,19 +48,20 @@ export const QuestionCard = ({
     const twoThirdsIndex = Math.floor(words.length * (2/3));
     
     if (questionType === 'fillInBlank') {
-      return {
+      const fillInBlankAnswer: FillInBlankAnswer = {
         beforeBlank: words.slice(0, twoThirdsIndex).join(' '),
         blank: words.slice(twoThirdsIndex, twoThirdsIndex + Math.ceil(words.length/3)).join(' '),
-        afterBlank: words.slice(twoThirdsIndex + Math.ceil(words.length/3)).join(' '),
+        afterBlank: words.slice(twoThirdsIndex + Math.ceil(words.length/3)).join(' ')
       };
+      return fillInBlankAnswer;
     } else if (questionType === 'dragAndDrop') {
       const fixedPart = words.slice(0, twoThirdsIndex).join(' ');
       const reorderablePart = words.slice(twoThirdsIndex);
-      const segments = [fixedPart, ...reorderablePart];
-      return {
-        segments,
-        correctOrder: segments.map((_, index) => index),
+      const dragAndDropAnswer: DragAndDropAnswer = {
+        segments: [fixedPart, ...reorderablePart],
+        correctOrder: Array.from({ length: reorderablePart.length + 1 }, (_, i) => i)
       };
+      return dragAndDropAnswer;
     }
     return null;
   };
@@ -91,13 +93,13 @@ export const QuestionCard = ({
         ) : questionType === 'fillInBlank' ? (
           <FillInBlankQuestion
             question={question.question}
-            answerData={prepareAnswerSegments()!}
+            answerData={prepareAnswerSegments() as FillInBlankAnswer}
             onAnswer={handleInteractiveAnswer}
           />
         ) : (
           <DragAndDropQuestion
             question={question.question}
-            answerData={prepareAnswerSegments()!}
+            answerData={prepareAnswerSegments() as DragAndDropAnswer}
             onAnswer={handleInteractiveAnswer}
           />
         )}
