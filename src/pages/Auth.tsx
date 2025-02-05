@@ -74,6 +74,54 @@ const Auth = () => {
     }
   };
 
+  const loginWithTestAccount = async () => {
+    setLoading(true);
+    try {
+      const { error } = await supabase.auth.signInWithPassword({
+        email: "test@example.com",
+        password: "test123456",
+      });
+
+      if (error) throw error;
+
+      toast({
+        title: "Welcome!",
+        description: "You have been signed in with the test account.",
+      });
+    } catch (error: any) {
+      // If the test account doesn't exist, create it
+      if (error.message.includes("Invalid login credentials")) {
+        try {
+          const { error: signUpError } = await supabase.auth.signUp({
+            email: "test@example.com",
+            password: "test123456",
+          });
+
+          if (signUpError) throw signUpError;
+
+          toast({
+            title: "Test Account Created",
+            description: "The test account has been created and you're now signed in.",
+          });
+        } catch (signUpError: any) {
+          toast({
+            title: "Error",
+            description: signUpError.message,
+            variant: "destructive",
+          });
+        }
+      } else {
+        toast({
+          title: "Error",
+          description: error.message,
+          variant: "destructive",
+        });
+      }
+    } finally {
+      setLoading(false);
+    }
+  };
+
   return (
     <div className="min-h-screen bg-gradient-to-b from-brand-50 to-white">
       <Navigation />
@@ -83,6 +131,26 @@ const Auth = () => {
           <h1 className="text-3xl font-bold text-brand-900 text-center mb-8">
             {isSignUp ? "Create an Account" : "Welcome Back"}
           </h1>
+
+          <Button
+            onClick={loginWithTestAccount}
+            className="w-full mb-6"
+            variant="secondary"
+            disabled={loading}
+          >
+            {loading ? "Loading..." : "Use Test Account"}
+          </Button>
+
+          <div className="relative mb-6">
+            <div className="absolute inset-0 flex items-center">
+              <span className="w-full border-t" />
+            </div>
+            <div className="relative flex justify-center text-xs uppercase">
+              <span className="bg-white px-2 text-muted-foreground">
+                Or continue with email
+              </span>
+            </div>
+          </div>
 
           <form onSubmit={handleAuth} className="space-y-6">
             <div className="space-y-2">
