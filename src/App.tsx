@@ -68,7 +68,8 @@ function App() {
             <Route path="/lords-days/:id" element={<LordsDay />} />
             <Route path="/leaderboard" element={<Leaderboard />} />
             <Route path="/auth" element={<Auth />} />
-            
+            <Route path="*" element={<NotFound />} />
+
             {/* Protected routes - only Dashboard requires authentication */}
             <Route
               path="/dashboard"
@@ -78,7 +79,6 @@ function App() {
                 </ProtectedRoute>
               }
             />
-            <Route path="*" element={<NotFound />} />
           </Routes>
         </BrowserRouter>
       </TooltipProvider>
