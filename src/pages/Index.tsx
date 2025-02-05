@@ -1,6 +1,5 @@
-
 import { ChevronRight } from "lucide-react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { Navigation } from "@/components/Navigation";
 
 interface FeatureIconProps {
@@ -8,6 +7,13 @@ interface FeatureIconProps {
 }
 
 const Index = () => {
+  const navigate = useNavigate();
+
+  const handleStartLearning = () => {
+    // Navigate to Lord's Day 1 directly
+    navigate('/lords-days/1');
+  };
+
   return (
     <div className="min-h-screen bg-gradient-to-b from-brand-50 to-white">
       <Navigation />
@@ -21,13 +27,13 @@ const Index = () => {
             <p className="text-lg md:text-xl text-brand-600 mb-8">
               An interactive platform to help you learn and remember these timeless truths.
             </p>
-            <Link
-              to="/lords-days"
+            <button
+              onClick={handleStartLearning}
               className="inline-flex items-center px-6 py-3 text-lg font-medium text-white bg-sage-600 rounded-lg hover:bg-sage-700 transition-colors"
             >
               Start Learning
               <ChevronRight className="ml-2" size={20} />
-            </Link>
+            </button>
           </div>
 
           <div className="grid md:grid-cols-3 gap-8 mb-16">
