@@ -1,9 +1,16 @@
 
-import { Home, Book, Trophy, Menu, LogOut } from "lucide-react";
+import { Home, Book, Trophy, Menu, LogOut, User } from "lucide-react";
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 
 export const Navigation = () => {
   const [isOpen, setIsOpen] = useState(false);
@@ -41,13 +48,22 @@ export const Navigation = () => {
                 <span>{item.label}</span>
               </Link>
             ))}
-            <button
-              onClick={handleLogout}
-              className="flex items-center space-x-2 text-brand-600 hover:text-brand-800 transition-colors"
-            >
-              <LogOut size={18} />
-              <span>Logout</span>
-            </button>
+            
+            <DropdownMenu>
+              <DropdownMenuTrigger className="flex items-center space-x-2 text-brand-600 hover:text-brand-800 transition-colors">
+                <User size={18} />
+                <span>Profile</span>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent>
+                <DropdownMenuItem onClick={() => navigate("/profile")}>
+                  Edit Profile
+                </DropdownMenuItem>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem onClick={handleLogout}>
+                  Logout
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
           </div>
 
           {/* Mobile Menu Button */}
@@ -73,6 +89,14 @@ export const Navigation = () => {
                 <span>{item.label}</span>
               </Link>
             ))}
+            <Link
+              to="/profile"
+              className="flex items-center space-x-2 px-4 py-3 text-brand-600 hover:text-brand-800 hover:bg-gray-50 rounded-md"
+              onClick={() => setIsOpen(false)}
+            >
+              <User size={18} />
+              <span>Profile</span>
+            </Link>
             <button
               onClick={handleLogout}
               className="flex items-center space-x-2 w-full px-4 py-3 text-brand-600 hover:text-brand-800 hover:bg-gray-50 rounded-md"
@@ -86,4 +110,3 @@ export const Navigation = () => {
     </nav>
   );
 };
-
