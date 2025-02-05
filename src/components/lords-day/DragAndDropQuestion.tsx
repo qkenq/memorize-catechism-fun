@@ -2,6 +2,7 @@ import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import type { DragAndDropAnswer } from "@/data/catechism/questionTypes";
 import { GripVertical } from "lucide-react";
+import { DragDropContext, Droppable, Draggable } from "@hello-pangea/dnd";
 
 interface DragAndDropQuestionProps {
   question: string;
@@ -42,11 +43,14 @@ export const DragAndDropQuestion = ({
   const [segments, setSegments] = useState([...answerData.segments]);
   const [hasSubmitted, setHasSubmitted] = useState(false);
 
-  const moveSegment = (from: number, to: number) => {
-    const newSegments = [...segments];
-    const [removed] = newSegments.splice(from, 1);
-    newSegments.splice(to, 0, removed);
-    setSegments(newSegments);
+  const handleDragEnd = (result: any) => {
+    if (!result.destination) return;
+
+    const items = Array.from(segments);
+    const [reorderedItem] = items.splice(result.source.index, 1);
+    items.splice(result.destination.index, 0, reorderedItem);
+
+    setSegments(items);
   };
 
   const handleSubmit = () => {
@@ -65,48 +69,42 @@ export const DragAndDropQuestion = ({
       <div className="text-lg text-brand-700 leading-relaxed space-y-4">
         <p>{question}</p>
         <div className="p-4 bg-brand-50 rounded-lg">
-          <p className="text-brand-600 mb-4">Drag the blocks below to complete each gap:</p>
-          <div className="space-y-2">
-            {/* Fixed first part */}
-            <div className="p-3 bg-white border rounded-lg">
-              <p>{segments[0]}</p>
-            </div>
-            {/* Draggable segments */}
-            <div className="mt-4 space-y-2">
-              <p className="text-brand-600 font-medium">Available blocks:</p>
-              {segments.slice(1).map((segment, index) => (
-                <div
-                  key={segment}
-                  className="flex items-center gap-2 p-3 bg-white border rounded-lg shadow-sm cursor-move"
-                >
-                  <GripVertical className="h-5 w-5 text-gray-400" />
-                  <span>{segment}</span>
-                  <div className="flex gap-2 ml-auto">
-                    {index > 0 && (
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={() => moveSegment(index + 1, index)}
-                        disabled={hasSubmitted}
-                      >
-                        ↑
-                      </Button>
-                    )}
-                    {index < segments.length - 2 && (
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={() => moveSegment(index + 1, index + 2)}
-                        disabled={hasSubmitted}
-                      >
-                        ↓
-                      </Button>
-                    )}
-                  </div>
-                </div>
-              ))}
-            </div>
+          <p className="text-brand-600 mb-4">Arrange the blocks in the correct order:</p>
+          
+          {/* Fixed first part */}
+          <div className="p-3 bg-white border rounded-lg mb-4">
+            <p>{segments[0]}</p>
           </div>
+
+          <DragDropContext onDragEnd={handleDragEnd}>
+            <Droppable droppableId="droppable">
+              {(provided) => (
+                <div
+                  {...provided.droppableProps}
+                  ref={provided.innerRef}
+                  className="space-y-2"
+                >
+                  <p className="text-brand-600 font-medium mb-2">Drag these blocks to complete the answer:</p>
+                  {segments.slice(1).map((segment, index) => (
+                    <Draggable key={segment} draggableId={segment} index={index}>
+                      {(provided) => (
+                        <div
+                          ref={provided.innerRef}
+                          {...provided.draggableProps}
+                          {...provided.dragHandleProps}
+                          className="flex items-center gap-2 p-3 bg-white border rounded-lg shadow-sm cursor-move hover:bg-brand-50 transition-colors"
+                        >
+                          <GripVertical className="h-5 w-5 text-brand-400" />
+                          <span>{segment}</span>
+                        </div>
+                      )}
+                    </Draggable>
+                  ))}
+                  {provided.placeholder}
+                </div>
+              )}
+            </Droppable>
+          </DragDropContext>
         </div>
       </div>
 
