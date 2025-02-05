@@ -19,21 +19,31 @@ const LordsDay = () => {
   const [startTime, setStartTime] = useState<number>(Date.now());
   const [selfScore, setSelfScore] = useState<number>(0);
   const [isCompleted, setIsCompleted] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
 
   const lordsDay = catechism.find(day => day.id === Number(id));
-  
+
   useEffect(() => {
+    console.log("LordsDay component mounted, checking auth...");
     supabase.auth.getSession().then(({ data: { session } }) => {
-      if (session) {
-        setUserId(session.user.id);
-      }
+      console.log("Auth session checked:", session?.user?.id || "no session");
+      setUserId(session?.user?.id || null);
+      setIsLoading(false);
     });
-    setStartTime(Date.now());
+
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange((_event, session) => {
+      setUserId(session?.user?.id || null);
+    });
+
+    return () => subscription.unsubscribe();
   }, []);
 
   const { data: progress, refetch: refetchProgress } = useQuery({
     queryKey: ['progress', id],
     queryFn: async () => {
+      if (!userId) return null;
       const { data, error } = await supabase
         .from('progress')
         .select('*')
@@ -47,11 +57,27 @@ const LordsDay = () => {
     enabled: !!userId && !!id,
   });
 
+  // Show loading state
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-gradient-to-b from-brand-50 to-white">
+        <Navigation />
+        <main className="container mx-auto pt-24 px-4">
+          <div className="text-center">Loading...</div>
+        </main>
+      </div>
+    );
+  }
+
+  // Check for invalid Lord's Day ID
   if (!lordsDay) {
+    console.log("Invalid Lord's Day ID:", id);
     return <Navigate to="/lords-days" replace />;
   }
 
+  // Check for authentication
   if (!userId) {
+    console.log("No user ID found, redirecting to auth");
     return <Navigate to="/auth" replace />;
   }
 
