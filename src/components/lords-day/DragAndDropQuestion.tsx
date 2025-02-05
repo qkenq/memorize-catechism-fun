@@ -37,51 +37,61 @@ export const DragAndDropQuestion = ({
 
   return (
     <div className="space-y-4">
-      <p className="text-lg text-brand-700 leading-relaxed">{question}</p>
-      <div className="space-y-2">
-        {segments.map((segment, index) => (
-          <div
-            key={segment}
-            className="flex items-center gap-2 p-3 bg-white border rounded-lg shadow-sm"
-          >
-            <GripVertical className="h-5 w-5 text-gray-400" />
-            <span>{segment}</span>
-            <div className="flex gap-2 ml-auto">
-              {index > 0 && (
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => moveSegment(index, index - 1)}
-                  disabled={hasSubmitted}
-                >
-                  ↑
-                </Button>
-              )}
-              {index < segments.length - 1 && (
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => moveSegment(index, index + 1)}
-                  disabled={hasSubmitted}
-                >
-                  ↓
-                </Button>
-              )}
+      <div className="text-lg text-brand-700 leading-relaxed space-y-4">
+        <p>{question}</p>
+        <div className="p-4 bg-brand-50 rounded-lg">
+          <p className="text-brand-600 mb-4">Arrange the parts in the correct order:</p>
+          <div className="space-y-2">
+            <div className="p-3 bg-white border rounded-lg">
+              <p>{segments[0]}</p>
             </div>
+            {segments.slice(1).map((segment, index) => (
+              <div
+                key={segment}
+                className="flex items-center gap-2 p-3 bg-white border rounded-lg shadow-sm"
+              >
+                <GripVertical className="h-5 w-5 text-gray-400" />
+                <span>{segment}</span>
+                <div className="flex gap-2 ml-auto">
+                  {index > 0 && (
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => moveSegment(index + 1, index)}
+                      disabled={hasSubmitted}
+                    >
+                      ↑
+                    </Button>
+                  )}
+                  {index < segments.length - 2 && (
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => moveSegment(index + 1, index + 2)}
+                      disabled={hasSubmitted}
+                    >
+                      ↓
+                    </Button>
+                  )}
+                </div>
+              </div>
+            ))}
           </div>
-        ))}
+        </div>
       </div>
+
       {!hasSubmitted && (
-        <Button onClick={handleSubmit} className="mt-4">
+        <Button onClick={handleSubmit} className="w-full">
           Submit Answer
         </Button>
       )}
+
       {hasSubmitted && (
-        <div className="mt-4">
+        <div className="mt-4 p-4 bg-white border rounded-lg">
           <p className="font-medium mb-2">Correct order:</p>
-          {answerData.correctOrder.map((index) => (
-            <p key={index} className="text-green-600">
-              {answerData.segments[index]}
+          {answerData.segments.map((segment, index) => (
+            <p key={index} className="text-green-600 mb-2">
+              {segment}
             </p>
           ))}
         </div>
