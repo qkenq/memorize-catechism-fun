@@ -65,42 +65,47 @@ export const DragAndDropQuestion = ({
       <div className="text-lg text-brand-700 leading-relaxed space-y-4">
         <p>{question}</p>
         <div className="p-4 bg-brand-50 rounded-lg">
-          <p className="text-brand-600 mb-4">Complete each gap with the correct ending:</p>
+          <p className="text-brand-600 mb-4">Drag the blocks below to complete each gap:</p>
           <div className="space-y-2">
+            {/* Fixed first part */}
             <div className="p-3 bg-white border rounded-lg">
               <p>{segments[0]}</p>
             </div>
-            {segments.slice(1).map((segment, index) => (
-              <div
-                key={segment}
-                className="flex items-center gap-2 p-3 bg-white border rounded-lg shadow-sm"
-              >
-                <GripVertical className="h-5 w-5 text-gray-400" />
-                <span>{segment}</span>
-                <div className="flex gap-2 ml-auto">
-                  {index > 0 && (
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() => moveSegment(index + 1, index)}
-                      disabled={hasSubmitted}
-                    >
-                      ↑
-                    </Button>
-                  )}
-                  {index < segments.length - 2 && (
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() => moveSegment(index + 1, index + 2)}
-                      disabled={hasSubmitted}
-                    >
-                      ↓
-                    </Button>
-                  )}
+            {/* Draggable segments */}
+            <div className="mt-4 space-y-2">
+              <p className="text-brand-600 font-medium">Available blocks:</p>
+              {segments.slice(1).map((segment, index) => (
+                <div
+                  key={segment}
+                  className="flex items-center gap-2 p-3 bg-white border rounded-lg shadow-sm cursor-move"
+                >
+                  <GripVertical className="h-5 w-5 text-gray-400" />
+                  <span>{segment}</span>
+                  <div className="flex gap-2 ml-auto">
+                    {index > 0 && (
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => moveSegment(index + 1, index)}
+                        disabled={hasSubmitted}
+                      >
+                        ↑
+                      </Button>
+                    )}
+                    {index < segments.length - 2 && (
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => moveSegment(index + 1, index + 2)}
+                        disabled={hasSubmitted}
+                      >
+                        ↓
+                      </Button>
+                    )}
+                  </div>
                 </div>
-              </div>
-            ))}
+              ))}
+            </div>
           </div>
         </div>
       </div>
