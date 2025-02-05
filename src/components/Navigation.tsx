@@ -1,10 +1,19 @@
 
-import { Home, Book, Trophy, Menu } from "lucide-react";
+import { Home, Book, Trophy, Menu, LogOut } from "lucide-react";
 import { useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
+import { supabase } from "@/integrations/supabase/client";
+import { toast } from "sonner";
 
 export const Navigation = () => {
   const [isOpen, setIsOpen] = useState(false);
+  const navigate = useNavigate();
+
+  const handleLogout = async () => {
+    await supabase.auth.signOut();
+    toast.success("Logged out successfully");
+    navigate("/");
+  };
 
   const menuItems = [
     { icon: Home, label: "Home", path: "/" },
@@ -21,7 +30,7 @@ export const Navigation = () => {
           </Link>
 
           {/* Desktop Navigation */}
-          <div className="hidden md:flex space-x-8">
+          <div className="hidden md:flex items-center space-x-8">
             {menuItems.map((item) => (
               <Link
                 key={item.label}
@@ -32,6 +41,13 @@ export const Navigation = () => {
                 <span>{item.label}</span>
               </Link>
             ))}
+            <button
+              onClick={handleLogout}
+              className="flex items-center space-x-2 text-brand-600 hover:text-brand-800 transition-colors"
+            >
+              <LogOut size={18} />
+              <span>Logout</span>
+            </button>
           </div>
 
           {/* Mobile Menu Button */}
@@ -57,9 +73,17 @@ export const Navigation = () => {
                 <span>{item.label}</span>
               </Link>
             ))}
+            <button
+              onClick={handleLogout}
+              className="flex items-center space-x-2 w-full px-4 py-3 text-brand-600 hover:text-brand-800 hover:bg-gray-50 rounded-md"
+            >
+              <LogOut size={18} />
+              <span>Logout</span>
+            </button>
           </div>
         )}
       </div>
     </nav>
   );
 };
+
