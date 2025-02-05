@@ -4,8 +4,11 @@ import { Navigate } from "react-router-dom";
 import { Navigation } from "@/components/Navigation";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
+import { Card } from "@/components/ui/card";
 import { useToast } from "@/components/ui/use-toast";
 import { Session } from "@supabase/supabase-js";
+import { useQuery } from "@tanstack/react-query";
+import { Trophy, Flame, Calendar } from "lucide-react";
 
 const Dashboard = () => {
   const [session, setSession] = useState<Session | null>(null);
@@ -27,9 +30,20 @@ const Dashboard = () => {
     return () => subscription.unsubscribe();
   }, []);
 
-  if (!session) {
-    return <Navigate to="/auth" replace />;
-  }
+  const { data: profile } = useQuery({
+    queryKey: ['profile', session?.user?.id],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('profiles')
+        .select('*')
+        .eq('id', session?.user?.id)
+        .maybeSingle();
+      
+      if (error) throw error;
+      return data;
+    },
+    enabled: !!session?.user?.id,
+  });
 
   const handleSignOut = async () => {
     const { error } = await supabase.auth.signOut();
@@ -40,6 +54,15 @@ const Dashboard = () => {
         variant: "destructive",
       });
     }
+  };
+
+  if (!session) {
+    return <Navigate to="/auth" replace />;
+  }
+
+  const formatDate = (date: string | null) => {
+    if (!date) return 'No activity yet';
+    return new Date(date).toLocaleDateString();
   };
 
   return (
@@ -55,7 +78,52 @@ const Dashboard = () => {
             </Button>
           </div>
           
-          <p className="text-brand-600">Welcome to your dashboard!</p>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+            <Card className="p-6">
+              <div className="flex items-center gap-4">
+                <div className="p-3 bg-brand-100 rounded-full">
+                  <Trophy className="w-6 h-6 text-brand-600" />
+                </div>
+                <div>
+                  <p className="text-sm text-brand-600">Total XP</p>
+                  <p className="text-2xl font-bold text-brand-900">{profile?.xp || 0}</p>
+                </div>
+              </div>
+            </Card>
+
+            <Card className="p-6">
+              <div className="flex items-center gap-4">
+                <div className="p-3 bg-brand-100 rounded-full">
+                  <Flame className="w-6 h-6 text-brand-600" />
+                </div>
+                <div>
+                  <p className="text-sm text-brand-600">Current Streak</p>
+                  <p className="text-2xl font-bold text-brand-900">{profile?.streak_days || 0} days</p>
+                </div>
+              </div>
+            </Card>
+
+            <Card className="p-6">
+              <div className="flex items-center gap-4">
+                <div className="p-3 bg-brand-100 rounded-full">
+                  <Calendar className="w-6 h-6 text-brand-600" />
+                </div>
+                <div>
+                  <p className="text-sm text-brand-600">Last Activity</p>
+                  <p className="text-2xl font-bold text-brand-900">
+                    {formatDate(profile?.last_activity_date)}
+                  </p>
+                </div>
+              </div>
+            </Card>
+          </div>
+
+          <Card className="p-6">
+            <h2 className="text-xl font-semibold text-brand-800 mb-4">Recent Activity</h2>
+            <p className="text-brand-600">
+              Keep learning to improve your stats! Study the catechism daily to maintain your streak.
+            </p>
+          </Card>
         </div>
       </main>
     </div>
