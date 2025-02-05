@@ -143,27 +143,29 @@ const Dashboard = () => {
             </Card>
           </div>
 
-          <Card className="p-6 mb-8" asChild>
-            <Link to="/lords-days" className="block hover:shadow-md transition-shadow">
-              <div className="space-y-4">
-                <div className="flex justify-between items-center">
-                  <div className="flex items-center gap-4">
-                    <div className="p-3 bg-brand-100 rounded-full">
-                      <BookOpen className="w-6 h-6 text-brand-600" />
+          <div className="mb-8">
+            <Link to="/lords-days" className="block">
+              <Card className="p-6 hover:shadow-md transition-shadow">
+                <div className="space-y-4">
+                  <div className="flex justify-between items-center">
+                    <div className="flex items-center gap-4">
+                      <div className="p-3 bg-brand-100 rounded-full">
+                        <BookOpen className="w-6 h-6 text-brand-600" />
+                      </div>
+                      <div>
+                        <h2 className="text-xl font-semibold text-brand-800">Overall Progress</h2>
+                        <p className="text-sm text-brand-600">
+                          {progressPercentage}% Complete
+                        </p>
+                      </div>
                     </div>
-                    <div>
-                      <h2 className="text-xl font-semibold text-brand-800">Overall Progress</h2>
-                      <p className="text-sm text-brand-600">
-                        {progressPercentage}% Complete
-                      </p>
-                    </div>
+                    <ArrowRight className="w-5 h-5 text-brand-600" />
                   </div>
-                  <ArrowRight className="w-5 h-5 text-brand-600" />
+                  <Progress value={progressPercentage} className="h-2" />
                 </div>
-                <Progress value={progressPercentage} className="h-2" />
-              </div>
+              </Card>
             </Link>
-          </Card>
+          </div>
 
           <Card className="p-6">
             <h2 className="text-xl font-semibold text-brand-800 mb-4">Recent Activity</h2>
