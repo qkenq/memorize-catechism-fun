@@ -10,31 +10,6 @@ interface DragAndDropQuestionProps {
   onAnswer: (isCorrect: boolean) => void;
 }
 
-const splitIntoThirds = (text: string): [string, string] => {
-  const words = text.split(' ');
-  const twoThirdsIndex = Math.floor(words.length * (2/3));
-  return [
-    words.slice(0, twoThirdsIndex).join(' '),
-    words.slice(twoThirdsIndex).join(' ')
-  ];
-};
-
-const splitAnswerIntoSegments = (answer: string): string[] => {
-  // Split answer into sentences or clauses (using periods, semicolons, or other major punctuation)
-  const clauses = answer.split(/(?<=[.;])\s+/);
-  
-  let segments: string[] = [];
-  let visibleParts: string[] = [];
-  
-  clauses.forEach(clause => {
-    const [visible, gap] = splitIntoThirds(clause.trim());
-    visibleParts.push(visible);
-    if (gap) segments.push(gap);
-  });
-  
-  return [visibleParts.join(' '), ...segments];
-};
-
 export const DragAndDropQuestion = ({
   question,
   answerData,
@@ -69,12 +44,14 @@ export const DragAndDropQuestion = ({
       <div className="text-lg text-brand-700 leading-relaxed space-y-4">
         <p>{question}</p>
         <div className="p-4 bg-brand-50 rounded-lg">
-          <p className="text-brand-600 mb-4">Arrange the blocks in the correct order:</p>
+          {/* Fixed visible portions */}
+          {answerData.visibleParts.map((visiblePart, index) => (
+            <div key={`visible-${index}`} className="p-3 bg-white border rounded-lg mb-4">
+              <p>{visiblePart}</p>
+            </div>
+          ))}
           
-          {/* Fixed first part */}
-          <div className="p-3 bg-white border rounded-lg mb-4">
-            <p>{segments[0]}</p>
-          </div>
+          <p className="text-brand-600 mb-4">Arrange these blocks to complete the answer:</p>
 
           <DragDropContext onDragEnd={handleDragEnd}>
             <Droppable droppableId="droppable">
@@ -84,8 +61,7 @@ export const DragAndDropQuestion = ({
                   ref={provided.innerRef}
                   className="space-y-2"
                 >
-                  <p className="text-brand-600 font-medium mb-2">Drag these blocks to complete the answer:</p>
-                  {segments.slice(1).map((segment, index) => (
+                  {segments.map((segment, index) => (
                     <Draggable key={segment} draggableId={segment} index={index}>
                       {(provided) => (
                         <div
