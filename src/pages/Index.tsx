@@ -25,10 +25,11 @@ const Index = () => {
 
   const handleStartLearning = () => {
     if (!userId) {
-      navigate("/auth", { state: { from: "/lords-days/1" } });
+      navigate("/auth", { state: { from: "/lords-day/1" } });
       toast("Please sign in to start learning");
     } else {
-      navigate("/lords-days/1");
+      console.log("Navigating to Lord's Day 1...");
+      navigate("/lords-day/1");
       toast.success("Starting with Lord's Day 1");
     }
   };
