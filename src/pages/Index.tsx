@@ -1,7 +1,6 @@
 import { ChevronRight } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { Navigation } from "@/components/Navigation";
-import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
@@ -25,7 +24,6 @@ const Index = () => {
   }, []);
 
   const handleStartLearning = () => {
-    console.log("Start Learning clicked");
     if (!userId) {
       navigate("/auth", { state: { from: "/lords-days/1" } });
       toast("Please sign in to start learning");
@@ -49,14 +47,13 @@ const Index = () => {
               An interactive platform to help you learn and remember these timeless truths.
             </p>
             <div className="pt-4">
-              <Button 
+              <button 
                 onClick={handleStartLearning}
-                size="lg"
-                className="text-lg group"
+                className="px-6 py-3 bg-sage-600 text-white rounded-md hover:bg-sage-700 transition-colors text-lg inline-flex items-center"
               >
                 Start Learning
-                <ChevronRight className="ml-2 group-hover:translate-x-1 transition-transform" />
-              </Button>
+                <ChevronRight className="ml-2" size={16} />
+              </button>
             </div>
           </div>
 
