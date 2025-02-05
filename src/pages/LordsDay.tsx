@@ -107,6 +107,7 @@ const LordsDay = () => {
     setShowAnswer(false);
     setIsCompleted(false);
     setSelfScore(0);
+    setStartTime(Date.now());
   };
 
   return (
@@ -118,7 +119,7 @@ const LordsDay = () => {
           <ProgressHeader
             title={lordsDay.title}
             totalTimeSpent={progress?.total_time_spent || 0}
-            currentQuestion={currentQuestionIndex}
+            currentQuestion={currentQuestionIndex + 1}
             totalQuestions={lordsDay.questions.length}
           />
 
@@ -134,9 +135,11 @@ const LordsDay = () => {
           )}
 
           {progress && (
-            <div className="text-sm text-brand-600 flex justify-between items-center">
-              <span>Best Score: {progress.score}%</span>
-              <span>Last studied: {new Date(progress.last_attempt_date).toLocaleDateString()}</span>
+            <div className="mt-6 p-4 bg-white rounded-lg shadow-sm border border-brand-100">
+              <div className="text-sm text-brand-600 flex justify-between items-center">
+                <span>Best Score: {progress.score}%</span>
+                <span>Last studied: {new Date(progress.last_attempt_date).toLocaleDateString()}</span>
+              </div>
             </div>
           )}
         </div>
