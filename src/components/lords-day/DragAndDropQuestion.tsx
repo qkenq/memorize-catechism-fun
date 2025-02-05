@@ -9,6 +9,31 @@ interface DragAndDropQuestionProps {
   onAnswer: (isCorrect: boolean) => void;
 }
 
+const splitIntoThirds = (text: string): [string, string] => {
+  const words = text.split(' ');
+  const twoThirdsIndex = Math.floor(words.length * (2/3));
+  return [
+    words.slice(0, twoThirdsIndex).join(' '),
+    words.slice(twoThirdsIndex).join(' ')
+  ];
+};
+
+const splitAnswerIntoSegments = (answer: string): string[] => {
+  // Split answer into sentences or clauses (using periods, semicolons, or other major punctuation)
+  const clauses = answer.split(/(?<=[.;])\s+/);
+  
+  let segments: string[] = [];
+  let visibleParts: string[] = [];
+  
+  clauses.forEach(clause => {
+    const [visible, gap] = splitIntoThirds(clause.trim());
+    visibleParts.push(visible);
+    if (gap) segments.push(gap);
+  });
+  
+  return [visibleParts.join(' '), ...segments];
+};
+
 export const DragAndDropQuestion = ({
   question,
   answerData,
@@ -40,7 +65,7 @@ export const DragAndDropQuestion = ({
       <div className="text-lg text-brand-700 leading-relaxed space-y-4">
         <p>{question}</p>
         <div className="p-4 bg-brand-50 rounded-lg">
-          <p className="text-brand-600 mb-4">Arrange the parts in the correct order:</p>
+          <p className="text-brand-600 mb-4">Complete each gap with the correct ending:</p>
           <div className="space-y-2">
             <div className="p-3 bg-white border rounded-lg">
               <p>{segments[0]}</p>
