@@ -1,17 +1,34 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
-import { Menu, X, RefreshCw } from "lucide-react";
+import { Menu, X, RefreshCw, Shield } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/components/ui/use-toast";
 import { useQueryClient } from "@tanstack/react-query";
+import { useEffect } from "react";
 
 export const Navigation = () => {
   const [isOpen, setIsOpen] = useState(false);
+  const [isAdmin, setIsAdmin] = useState(false);
   const isMobile = useIsMobile();
   const { toast } = useToast();
   const queryClient = useQueryClient();
+
+  useEffect(() => {
+    const checkAdminStatus = async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (user) {
+        const { data } = await supabase
+          .from('profiles')
+          .select('role')
+          .eq('id', user.id)
+          .single();
+        setIsAdmin(data?.role === 'admin');
+      }
+    };
+    checkAdminStatus();
+  }, []);
 
   const toggleMenu = () => {
     setIsOpen(!isOpen);
@@ -80,6 +97,7 @@ export const Navigation = () => {
     { to: "/leaderboard", label: "Leaderboard" },
     { to: "/dashboard", label: "Dashboard" },
     { to: "/profile", label: "Profile" },
+    ...(isAdmin ? [{ to: "/quiz-management", label: "Admin", icon: Shield }] : []),
   ];
 
   const renderNavItems = () => (
@@ -88,9 +106,10 @@ export const Navigation = () => {
         <Link
           key={item.to}
           to={item.to}
-          className="text-brand-600 hover:text-brand-900 px-3 py-2 rounded-md text-sm font-medium"
+          className="text-brand-600 hover:text-brand-900 px-3 py-2 rounded-md text-sm font-medium flex items-center"
           onClick={() => isMobile && setIsOpen(false)}
         >
+          {item.icon && <item.icon className="w-4 h-4 mr-2" />}
           {item.label}
         </Link>
       ))}
