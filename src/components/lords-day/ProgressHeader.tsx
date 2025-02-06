@@ -1,4 +1,3 @@
-
 import { Progress } from "@/components/ui/progress";
 import { Timer } from "lucide-react";
 
@@ -37,9 +36,6 @@ export const ProgressHeader = ({
 
       <div className="mb-6">
         <Progress value={progressPercentage} className="h-2" />
-        <p className="text-sm text-brand-600 mt-2">
-          Question {currentQuestion + 1} of {totalQuestions}
-        </p>
       </div>
     </>
   );

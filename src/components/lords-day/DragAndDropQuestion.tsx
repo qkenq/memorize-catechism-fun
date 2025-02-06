@@ -72,10 +72,10 @@ export const DragAndDropQuestion = ({
 
   return (
     <div className="space-y-4 w-full">
-      <div className="text-sm text-brand-600 mb-4">
-        Question {questionNumber} of {totalQuestions}
+      <div className="text-lg text-brand-700 leading-relaxed mb-6">
+        {`Q&A ${questionNumber}`}
       </div>
-      
+
       <div className="text-lg text-brand-700 leading-relaxed mb-6">
         {question}
       </div>
