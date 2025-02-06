@@ -7,7 +7,8 @@ import { supabase } from "@/integrations/supabase/client";
 import { useQuery } from "@tanstack/react-query";
 import { QuestionCard } from "@/components/lords-day/QuestionCard";
 import { CompletionCard } from "@/components/lords-day/CompletionCard";
-import { ProgressHeader } from "@/components/lords-day/ProgressHeader";
+import { LordsDayHeader } from "@/components/lords-day/LordsDayHeader";
+import { LordsDayProgress } from "@/components/lords-day/LordsDayProgress";
 
 const LordsDay = () => {
   const { id } = useParams();
@@ -40,23 +41,6 @@ const LordsDay = () => {
     return () => subscription.unsubscribe();
   }, []);
 
-  const { data: progress, refetch: refetchProgress } = useQuery({
-    queryKey: ['progress', id],
-    queryFn: async () => {
-      if (!userId) return null;
-      const { data, error } = await supabase
-        .from('progress')
-        .select('*')
-        .eq('lords_day_id', Number(id))
-        .eq('user_id', userId)
-        .maybeSingle();
-      
-      if (error) throw error;
-      return data;
-    },
-    enabled: !!userId && !!id,
-  });
-
   const { data: userProfile } = useQuery({
     queryKey: ['profile', userId],
     queryFn: async () => {
@@ -73,11 +57,71 @@ const LordsDay = () => {
     enabled: !!userId,
   });
 
-  useEffect(() => {
-    if (progress?.current_round) {
-      setCurrentRound(progress.current_round);
+  const handleSelfScore = async (understood: boolean) => {
+    const score = understood ? 100 : 50;
+    setSelfScore(prev => prev + score);
+    await handleNext(score);
+  };
+
+  const handleNext = async (questionScore: number) => {
+    const timeSpent = Math.floor((Date.now() - startTime) / 1000);
+    const averageScore = Math.floor((selfScore + questionScore) / (currentQuestionIndex + 1));
+    
+    if (currentQuestionIndex < lordsDay!.questions.length - 1) {
+      setCurrentQuestionIndex(prev => prev + 1);
+      setShowAnswer(false);
+    } else if (currentRound < 3) {
+      const nextRound = currentRound + 1;
+      setCurrentRound(nextRound);
+      setCurrentQuestionIndex(0);
+      setShowAnswer(false);
+      setSelfScore(0);
+      
+      await updateProgress(averageScore, timeSpent, nextRound);
+    } else {
+      setIsCompleted(true);
+      await updateProgress(averageScore, timeSpent, 3);
+      toast({
+        title: "Congratulations! 🎉",
+        description: `You've completed ${lordsDay!.title} with an average score of ${averageScore}%!`,
+      });
     }
-  }, [progress]);
+    setStartTime(Date.now());
+  };
+
+  const updateProgress = async (score: number, timeSpent: number, round: number) => {
+    const { error } = await supabase
+      .from('progress')
+      .upsert({
+        lords_day_id: lordsDay!.id,
+        user_id: userId,
+        score,
+        level: 1,
+        current_round: round,
+        total_time_spent: timeSpent,
+        last_attempt_date: new Date().toISOString()
+      }, {
+        onConflict: 'user_id,lords_day_id'
+      });
+
+    if (error) {
+      console.error("Error updating progress:", error);
+      toast({
+        title: "Error",
+        description: "Failed to save progress",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const handleStudyAgain = () => {
+    setCurrentQuestionIndex(0);
+    setShowAnswer(false);
+    setIsCompleted(false);
+    setSelfScore(0);
+    setCurrentRound(1);
+    setStartTime(Date.now());
+  };
 
   if (isLoading) {
     return (
@@ -100,114 +144,23 @@ const LordsDay = () => {
     return <Navigate to="/auth" replace />;
   }
 
-  const currentQuestion = lordsDay.questions[currentQuestionIndex];
-  
-  const handleSelfScore = async (understood: boolean) => {
-    const score = understood ? 100 : 50;
-    setSelfScore(prev => prev + score);
-    await handleNext(score);
-  };
-
-  const handleNext = async (questionScore: number) => {
-    const timeSpent = Math.floor((Date.now() - startTime) / 1000);
-    const averageScore = Math.floor((selfScore + questionScore) / (currentQuestionIndex + 1));
-    
-    if (currentQuestionIndex < lordsDay.questions.length - 1) {
-      setCurrentQuestionIndex(prev => prev + 1);
-      setShowAnswer(false);
-    } else if (currentRound < 3) {
-      // Move to next round
-      const nextRound = currentRound + 1;
-      setCurrentRound(nextRound);
-      setCurrentQuestionIndex(0);
-      setShowAnswer(false);
-      setSelfScore(0);
-      
-      const { error } = await supabase
-        .from('progress')
-        .upsert({
-          lords_day_id: lordsDay.id,
-          user_id: userId,
-          score: averageScore,
-          level: 1,
-          current_round: nextRound,
-          total_time_spent: (progress?.total_time_spent || 0) + timeSpent,
-          last_attempt_date: new Date().toISOString()
-        }, {
-          onConflict: 'user_id,lords_day_id'
-        });
-
-      if (error) {
-        console.error("Error updating progress:", error);
-        toast({
-          title: "Error",
-          description: "Failed to save progress",
-          variant: "destructive",
-        });
-        return;
-      }
-    } else {
-      // Complete all rounds
-      setIsCompleted(true);
-      const { error } = await supabase
-        .from('progress')
-        .upsert({
-          lords_day_id: lordsDay.id,
-          user_id: userId,
-          score: averageScore,
-          level: 1,
-          current_round: 3,
-          total_time_spent: (progress?.total_time_spent || 0) + timeSpent,
-          last_attempt_date: new Date().toISOString()
-        }, {
-          onConflict: 'user_id,lords_day_id'
-        });
-
-      if (error) {
-        console.error("Error updating progress:", error);
-        toast({
-          title: "Error",
-          description: "Failed to save progress",
-          variant: "destructive",
-        });
-        return;
-      }
-
-      toast({
-        title: "Congratulations! 🎉",
-        description: `You've completed ${lordsDay.title} with an average score of ${averageScore}%!`,
-      });
-    }
-
-    await refetchProgress();
-    setStartTime(Date.now());
-  };
-
-  const handleStudyAgain = () => {
-    setCurrentQuestionIndex(0);
-    setShowAnswer(false);
-    setIsCompleted(false);
-    setSelfScore(0);
-    setCurrentRound(1);
-    setStartTime(Date.now());
-  };
-
   return (
     <div className="min-h-screen bg-gradient-to-b from-brand-50 to-white">
       <Navigation />
       
       <main className="pt-24 px-4 pb-12">
         <div className="container max-w-[1600px] mx-auto">
-          <ProgressHeader
-            title={`${lordsDay.title} - Round ${currentRound}`}
-            totalTimeSpent={progress?.total_time_spent || 0}
-            currentQuestion={currentQuestionIndex + 1}
+          <LordsDayHeader
+            title={lordsDay.title}
+            totalTimeSpent={0}
+            currentQuestion={currentQuestionIndex}
             totalQuestions={lordsDay.questions.length}
+            currentRound={currentRound}
           />
 
           {!isCompleted ? (
             <QuestionCard
-              question={currentQuestion}
+              question={lordsDay.questions[currentQuestionIndex]}
               showAnswer={showAnswer}
               onShowAnswer={() => setShowAnswer(true)}
               onSelfScore={handleSelfScore}
@@ -220,14 +173,7 @@ const LordsDay = () => {
             <CompletionCard onStudyAgain={handleStudyAgain} />
           )}
 
-          {progress && (
-            <div className="mt-6 p-4 bg-white rounded-lg shadow-sm border border-brand-100">
-              <div className="text-sm text-brand-600 flex justify-between items-center">
-                <span>Best Score: {progress.score}%</span>
-                <span>Last studied: {new Date(progress.last_attempt_date).toLocaleDateString()}</span>
-              </div>
-            </div>
-          )}
+          <LordsDayProgress lordsDayId={lordsDay.id} userId={userId} />
         </div>
       </main>
     </div>
