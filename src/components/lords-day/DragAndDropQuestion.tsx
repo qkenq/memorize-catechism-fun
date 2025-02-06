@@ -4,7 +4,6 @@ import type { DragAndDropAnswer } from "@/data/catechism/questionTypes";
 import { DragDropContext, Droppable } from "@hello-pangea/dnd";
 import { DraggableSegment } from "./DraggableSegment";
 import { DroppableGap } from "./DroppableGap";
-import { QuestionSection } from "./QuestionSection";
 
 interface DragAndDropQuestionProps {
   question: string;
