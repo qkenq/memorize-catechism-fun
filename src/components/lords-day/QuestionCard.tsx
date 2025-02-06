@@ -34,6 +34,10 @@ export const QuestionCard = ({
 
   const shouldBeInteractive = userLevel === 1;
   
+  // For level 1, we only show the first question in multiple rounds
+  const displayedQuestionNumber = userLevel === 1 ? 1 : questionNumber;
+  const displayedTotalQuestions = userLevel === 1 ? 1 : totalQuestions;
+  
   const questionType = question.type || (shouldBeInteractive 
     ? (!completedFillInBlank ? 'fillInBlank' : 'dragAndDrop')
     : 'standard');
@@ -84,8 +88,8 @@ export const QuestionCard = ({
           <>
             <QuestionSection 
               question={question} 
-              questionNumber={questionNumber}
-              totalQuestions={totalQuestions}
+              questionNumber={displayedQuestionNumber}
+              totalQuestions={displayedTotalQuestions}
             />
             {showAnswer ? (
               <AnswerSection 
@@ -111,16 +115,16 @@ export const QuestionCard = ({
             question={question.question}
             answerData={prepareAnswerSegments() as FillInBlankAnswer}
             onAnswer={handleInteractiveAnswer}
-            questionNumber={questionNumber}
-            totalQuestions={totalQuestions}
+            questionNumber={displayedQuestionNumber}
+            totalQuestions={displayedTotalQuestions}
           />
         ) : (
           <DragAndDropQuestion
             question={question.question}
             answerData={prepareAnswerSegments() as DragAndDropAnswer}
             onAnswer={handleInteractiveAnswer}
-            questionNumber={questionNumber}
-            totalQuestions={totalQuestions}
+            questionNumber={displayedQuestionNumber}
+            totalQuestions={displayedTotalQuestions}
           />
         )}
 

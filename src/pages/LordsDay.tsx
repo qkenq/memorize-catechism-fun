@@ -67,24 +67,45 @@ const LordsDay = () => {
     const timeSpent = Math.floor((Date.now() - startTime) / 1000);
     const averageScore = Math.floor((selfScore + questionScore) / (currentQuestionIndex + 1));
     
-    if (currentQuestionIndex < lordsDay!.questions.length - 1) {
-      setCurrentQuestionIndex(prev => prev + 1);
-      setShowAnswer(false);
-    } else if (currentRound < 3) {
-      const nextRound = currentRound + 1;
-      setCurrentRound(nextRound);
-      setCurrentQuestionIndex(0);
-      setShowAnswer(false);
-      setSelfScore(0);
-      
-      await updateProgress(averageScore, timeSpent, nextRound);
+    const userLevel = userProfile?.level || 1;
+    const isLevel1 = userLevel === 1;
+    
+    // For level 1, we stay on Q&A 1 and just increment rounds
+    if (isLevel1) {
+      if (currentRound < 3) {
+        const nextRound = currentRound + 1;
+        setCurrentRound(nextRound);
+        setShowAnswer(false);
+        setSelfScore(0);
+        await updateProgress(averageScore, timeSpent, nextRound);
+      } else {
+        setIsCompleted(true);
+        await updateProgress(averageScore, timeSpent, 3);
+        toast({
+          title: "Congratulations! 🎉",
+          description: `You've completed ${lordsDay!.title} with an average score of ${averageScore}%!`,
+        });
+      }
     } else {
-      setIsCompleted(true);
-      await updateProgress(averageScore, timeSpent, 3);
-      toast({
-        title: "Congratulations! 🎉",
-        description: `You've completed ${lordsDay!.title} with an average score of ${averageScore}%!`,
-      });
+      // Normal progression through questions for higher levels
+      if (currentQuestionIndex < lordsDay!.questions.length - 1) {
+        setCurrentQuestionIndex(prev => prev + 1);
+        setShowAnswer(false);
+      } else if (currentRound < 3) {
+        const nextRound = currentRound + 1;
+        setCurrentRound(nextRound);
+        setCurrentQuestionIndex(0);
+        setShowAnswer(false);
+        setSelfScore(0);
+        await updateProgress(averageScore, timeSpent, nextRound);
+      } else {
+        setIsCompleted(true);
+        await updateProgress(averageScore, timeSpent, 3);
+        toast({
+          title: "Congratulations! 🎉",
+          description: `You've completed ${lordsDay!.title} with an average score of ${averageScore}%!`,
+        });
+      }
     }
     setStartTime(Date.now());
   };
@@ -96,7 +117,7 @@ const LordsDay = () => {
         lords_day_id: lordsDay!.id,
         user_id: userId,
         score,
-        level: 1,
+        level: userProfile?.level || 1,
         current_round: round,
         total_time_spent: timeSpent,
         last_attempt_date: new Date().toISOString()
@@ -144,6 +165,10 @@ const LordsDay = () => {
     return <Navigate to="/auth" replace />;
   }
 
+  const questions = userProfile?.level === 1 
+    ? [lordsDay.questions[0]] // Only show first question for level 1
+    : lordsDay.questions;
+
   return (
     <div className="min-h-screen bg-gradient-to-b from-brand-50 to-white">
       <Navigation />
@@ -154,20 +179,20 @@ const LordsDay = () => {
             title={lordsDay.title}
             totalTimeSpent={0}
             currentQuestion={currentQuestionIndex}
-            totalQuestions={lordsDay.questions.length}
+            totalQuestions={questions.length}
             currentRound={currentRound}
           />
 
           {!isCompleted ? (
             <QuestionCard
-              question={lordsDay.questions[currentQuestionIndex]}
+              question={questions[currentQuestionIndex]}
               showAnswer={showAnswer}
               onShowAnswer={() => setShowAnswer(true)}
               onSelfScore={handleSelfScore}
               userLevel={userProfile?.level || 1}
               currentRound={currentRound}
               questionNumber={currentQuestionIndex + 1}
-              totalQuestions={lordsDay.questions.length}
+              totalQuestions={questions.length}
             />
           ) : (
             <CompletionCard onStudyAgain={handleStudyAgain} />
