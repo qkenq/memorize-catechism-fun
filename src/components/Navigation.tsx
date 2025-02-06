@@ -1,5 +1,4 @@
-
-import { Home, Book, Trophy, Menu, LogOut, User } from "lucide-react";
+import { Home, Book, Trophy, Menu, LogOut, User, RefreshCw } from "lucide-react";
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
@@ -11,6 +10,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { Button } from "@/components/ui/button";
 
 export const Navigation = () => {
   const [isOpen, setIsOpen] = useState(false);
@@ -20,6 +20,39 @@ export const Navigation = () => {
     await supabase.auth.signOut();
     toast.success("Logged out successfully");
     navigate("/");
+  };
+
+  const handleResetProgress = async () => {
+    const { error } = await supabase
+      .from('progress')
+      .delete()
+      .neq('id', ''); // Delete all records
+
+    if (error) {
+      console.error("Error resetting progress:", error);
+      toast.error("Failed to reset progress");
+      return;
+    }
+
+    // Reset XP and streak in profile
+    const { error: profileError } = await supabase
+      .from('profiles')
+      .update({
+        xp: 0,
+        streak_days: 0,
+        last_activity_date: null,
+        level: 1
+      })
+      .eq('id', (await supabase.auth.getUser()).data.user?.id);
+
+    if (profileError) {
+      console.error("Error resetting profile:", profileError);
+      toast.error("Failed to reset profile stats");
+      return;
+    }
+
+    toast.success("Progress reset successfully");
+    window.location.reload(); // Refresh to show updated state
   };
 
   const menuItems = [
@@ -49,6 +82,16 @@ export const Navigation = () => {
               </Link>
             ))}
             
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={handleResetProgress}
+              className="flex items-center space-x-2"
+            >
+              <RefreshCw size={16} />
+              <span>Reset Progress</span>
+            </Button>
+
             <DropdownMenu>
               <DropdownMenuTrigger className="flex items-center space-x-2 text-brand-600 hover:text-brand-800 transition-colors">
                 <User size={18} />
@@ -89,6 +132,13 @@ export const Navigation = () => {
                 <span>{item.label}</span>
               </Link>
             ))}
+            <button
+              onClick={handleResetProgress}
+              className="flex items-center space-x-2 w-full px-4 py-3 text-brand-600 hover:text-brand-800 hover:bg-gray-50 rounded-md"
+            >
+              <RefreshCw size={18} />
+              <span>Reset Progress</span>
+            </button>
             <Link
               to="/profile"
               className="flex items-center space-x-2 px-4 py-3 text-brand-600 hover:text-brand-800 hover:bg-gray-50 rounded-md"
