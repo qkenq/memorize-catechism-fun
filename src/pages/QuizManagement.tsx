@@ -16,13 +16,14 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { Eye } from "lucide-react";
+import { Eye, PlayCircle } from "lucide-react";
 import {
   Dialog,
   DialogContent,
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
+import { QuizPreview } from "@/components/quiz-preview/QuizPreview";
 
 export default function QuizManagement() {
   const { toast } = useToast();
@@ -32,6 +33,7 @@ export default function QuizManagement() {
   const [gapText, setGapText] = useState("");
   const [inputMethod, setInputMethod] = useState<"drag" | "type">("type");
   const [previewQuiz, setPreviewQuiz] = useState<any>(null);
+  const [showStudentPreview, setShowStudentPreview] = useState(false);
 
   // Fetch quizzes
   const { data: quizzes, isLoading } = useQuery({
@@ -87,7 +89,7 @@ export default function QuizManagement() {
     }
   };
 
-  const QuizPreview = ({ quiz }: { quiz: any }) => {
+  const QuizDataPreview = ({ quiz }: { quiz: any }) => {
     return (
       <div className="space-y-4">
         <h3 className="font-medium">Visible Text:</h3>
@@ -187,7 +189,7 @@ export default function QuizManagement() {
                   <TableHead>Title</TableHead>
                   <TableHead>Type</TableHead>
                   <TableHead>Created At</TableHead>
-                  <TableHead className="w-[100px]">Actions</TableHead>
+                  <TableHead className="w-[140px]">Actions</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -197,13 +199,28 @@ export default function QuizManagement() {
                     <TableCell>{quiz.type}</TableCell>
                     <TableCell>{new Date(quiz.created_at).toLocaleDateString()}</TableCell>
                     <TableCell>
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        onClick={() => setPreviewQuiz(quiz)}
-                      >
-                        <Eye className="h-4 w-4" />
-                      </Button>
+                      <div className="flex gap-2">
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          onClick={() => {
+                            setPreviewQuiz(quiz);
+                            setShowStudentPreview(false);
+                          }}
+                        >
+                          <Eye className="h-4 w-4" />
+                        </Button>
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          onClick={() => {
+                            setPreviewQuiz(quiz);
+                            setShowStudentPreview(true);
+                          }}
+                        >
+                          <PlayCircle className="h-4 w-4" />
+                        </Button>
+                      </div>
                     </TableCell>
                   </TableRow>
                 ))}
@@ -215,11 +232,19 @@ export default function QuizManagement() {
 
       {/* Preview Dialog */}
       <Dialog open={!!previewQuiz} onOpenChange={() => setPreviewQuiz(null)}>
-        <DialogContent>
+        <DialogContent className="max-w-4xl">
           <DialogHeader>
-            <DialogTitle>{previewQuiz?.title}</DialogTitle>
+            <DialogTitle>
+              {showStudentPreview ? "Student Preview" : "Quiz Content"} - {previewQuiz?.title}
+            </DialogTitle>
           </DialogHeader>
-          {previewQuiz && <QuizPreview quiz={previewQuiz} />}
+          {previewQuiz && (
+            showStudentPreview ? (
+              <QuizPreview quiz={previewQuiz} />
+            ) : (
+              <QuizDataPreview quiz={previewQuiz} />
+            )
+          )}
         </DialogContent>
       </Dialog>
     </div>
