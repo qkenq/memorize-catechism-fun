@@ -125,6 +125,7 @@ export const QuestionCard = ({
             onAnswer={handleInteractiveAnswer}
             questionNumber={displayedQuestionNumber}
             totalQuestions={displayedTotalQuestions}
+            currentRound={currentRound}
           />
         )}
 

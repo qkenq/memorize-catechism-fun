@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import type { DragAndDropAnswer } from "@/data/catechism/questionTypes";
 import { DragDropContext, Droppable } from "@hello-pangea/dnd";
@@ -11,6 +11,7 @@ interface DragAndDropQuestionProps {
   onAnswer: (isCorrect: boolean) => void;
   questionNumber: number;
   totalQuestions: number;
+  currentRound: number;
 }
 
 export const DragAndDropQuestion = ({
@@ -19,12 +20,20 @@ export const DragAndDropQuestion = ({
   onAnswer,
   questionNumber,
   totalQuestions,
+  currentRound,
 }: DragAndDropQuestionProps) => {
   const [segments, setSegments] = useState([...answerData.segments]);
   const [droppedSegments, setDroppedSegments] = useState<(string | null)[]>(
     new Array(answerData.segments.length).fill(null)
   );
   const [hasSubmitted, setHasSubmitted] = useState(false);
+
+  // Reset the state when the round changes
+  useEffect(() => {
+    setSegments([...answerData.segments]);
+    setDroppedSegments(new Array(answerData.segments.length).fill(null));
+    setHasSubmitted(false);
+  }, [currentRound, answerData.segments]);
 
   const handleDragEnd = (result: any) => {
     if (!result.destination) return;
@@ -73,7 +82,7 @@ export const DragAndDropQuestion = ({
   return (
     <div className="space-y-4 w-full">
       <div className="text-lg text-brand-700 leading-relaxed mb-6">
-        {`Q&A ${questionNumber}`}
+        Q&A {questionNumber}
       </div>
 
       <div className="text-lg text-brand-700 leading-relaxed mb-6">
