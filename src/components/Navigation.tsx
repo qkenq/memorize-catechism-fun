@@ -1,6 +1,6 @@
 import { useState } from "react";
-import { Link } from "react-router-dom";
-import { Menu, X, RefreshCw, Shield } from "lucide-react";
+import { Link, useNavigate } from "react-router-dom";
+import { Menu, X, RefreshCw, Shield, LogOut } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { supabase } from "@/integrations/supabase/client";
@@ -14,6 +14,7 @@ export const Navigation = () => {
   const isMobile = useIsMobile();
   const { toast } = useToast();
   const queryClient = useQueryClient();
+  const navigate = useNavigate();
 
   useEffect(() => {
     const checkAdminStatus = async () => {
@@ -29,6 +30,23 @@ export const Navigation = () => {
     };
     checkAdminStatus();
   }, []);
+
+  const handleLogout = async () => {
+    const { error } = await supabase.auth.signOut();
+    if (error) {
+      toast({
+        variant: "destructive",
+        title: "Error",
+        description: "Failed to log out"
+      });
+    } else {
+      navigate('/auth');
+      toast({
+        title: "Success",
+        description: "Logged out successfully"
+      });
+    }
+  };
 
   const toggleMenu = () => {
     setIsOpen(!isOpen);
@@ -121,6 +139,15 @@ export const Navigation = () => {
       >
         <RefreshCw className="w-4 h-4 mr-2" />
         Reset Progress
+      </Button>
+      <Button
+        variant="ghost"
+        size="sm"
+        onClick={handleLogout}
+        className="ml-3"
+      >
+        <LogOut className="w-4 h-4 mr-2" />
+        Logout
       </Button>
     </>
   );
