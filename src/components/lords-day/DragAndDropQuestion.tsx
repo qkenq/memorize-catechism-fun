@@ -97,8 +97,8 @@ export const DragAndDropQuestion = ({
 
       const draggedSegment = segments[source.index];
       
-      // In round 3, any segment can go in any position
-      const isCorrectPosition = currentRound === 3 
+      // In rounds 2 and 3, any segment can go in any position
+      const isCorrectPosition = currentRound >= 2 
         ? true 
         : gapIndex === answerData.correctOrder.findIndex(
             index => answerData.segments[index] === draggedSegment
@@ -125,6 +125,15 @@ export const DragAndDropQuestion = ({
 
     const isCorrect = currentRound === 3
       ? droppedSegments.join(' ') === answerData.visibleParts.concat(answerData.segments).join(' ')
+      : currentRound === 2
+      ? droppedSegments.every((segment, index) => {
+          const visiblePart = answerData.visibleParts[index];
+          if (!visiblePart) return true;
+          const words = visiblePart.split(' ');
+          const oneThirdLength = Math.floor(words.length / 3);
+          const expectedSegment = words.slice(oneThirdLength).join(' ');
+          return segment === expectedSegment;
+        })
       : droppedSegments.every(
           (segment, index) => segment === answerData.segments[answerData.correctOrder[index]]
         );
