@@ -1,4 +1,3 @@
-
 import { useEffect, useState } from "react";
 import { Navigation } from "@/components/Navigation";
 import { catechism } from "@/data/catechism";
@@ -6,12 +5,13 @@ import { ChevronRight } from "lucide-react";
 import { Link, Navigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 
 const LordsDays = () => {
   const [userId, setUserId] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
+  const queryClient = useQueryClient();
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data: { session } }) => {
@@ -28,7 +28,7 @@ const LordsDays = () => {
     return () => subscription.unsubscribe();
   }, []);
 
-  const { data: progress } = useQuery({
+  const { data: progress, refetch } = useQuery({
     queryKey: ['progress'],
     queryFn: async () => {
       if (!userId) return [];
@@ -37,11 +37,21 @@ const LordsDays = () => {
         .select('*')
         .eq('user_id', userId);
       
-      if (error) throw error;
+      if (error) {
+        console.error("Error fetching progress:", error);
+        return [];
+      }
       return data || [];
     },
     enabled: !!userId,
+    staleTime: 0, // This ensures we always get fresh data
+    cacheTime: 0  // This ensures the cache is cleared immediately
   });
+
+  // Force refetch when component mounts
+  useEffect(() => {
+    refetch();
+  }, [refetch]);
 
   if (loading) {
     return <div>Loading...</div>;
@@ -117,4 +127,3 @@ const LordsDays = () => {
 };
 
 export default LordsDays;
-
