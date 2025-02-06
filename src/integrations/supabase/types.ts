@@ -27,6 +27,36 @@ export type Database = {
         }
         Relationships: []
       }
+      lessons: {
+        Row: {
+          content: string
+          created_at: string
+          created_by: string
+          id: string
+          quiz_ids: string[] | null
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          content: string
+          created_at?: string
+          created_by: string
+          id?: string
+          quiz_ids?: string[] | null
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          content?: string
+          created_at?: string
+          created_by?: string
+          id?: string
+          quiz_ids?: string[] | null
+          title?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           age: number | null
@@ -113,6 +143,39 @@ export type Database = {
         }
         Relationships: []
       }
+      quizzes: {
+        Row: {
+          created_at: string
+          created_by: string
+          gap_text: string[]
+          id: string
+          title: string
+          type: Database["public"]["Enums"]["quiz_type"]
+          updated_at: string
+          visible_text: string[]
+        }
+        Insert: {
+          created_at?: string
+          created_by: string
+          gap_text: string[]
+          id?: string
+          title: string
+          type?: Database["public"]["Enums"]["quiz_type"]
+          updated_at?: string
+          visible_text: string[]
+        }
+        Update: {
+          created_at?: string
+          created_by?: string
+          gap_text?: string[]
+          id?: string
+          title?: string
+          type?: Database["public"]["Enums"]["quiz_type"]
+          updated_at?: string
+          visible_text?: string[]
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
@@ -122,6 +185,7 @@ export type Database = {
     }
     Enums: {
       app_role: "admin" | "member"
+      quiz_type: "drag_and_drop" | "fill_in_blank" | "multiple_choice"
     }
     CompositeTypes: {
       [_ in never]: never
