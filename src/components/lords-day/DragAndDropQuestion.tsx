@@ -27,17 +27,44 @@ export const DragAndDropQuestion = ({
     if (currentRound === 3) {
       // For round 3, everything is draggable
       return [...answerData.visibleParts, ...answerData.segments];
+    } else if (currentRound === 2) {
+      // For round 2, make 2/3 of each visible part draggable
+      const round2Segments = answerData.visibleParts.map(part => {
+        const words = part.split(' ');
+        const oneThirdLength = Math.floor(words.length / 3);
+        return words.slice(oneThirdLength).join(' ');
+      });
+      return [...round2Segments, ...answerData.segments];
     }
-    // For rounds 1 and 2, only the segments are draggable
+    // For round 1, only the original segments are draggable
     return [...answerData.segments];
+  };
+
+  const getVisibleParts = () => {
+    if (currentRound === 3) {
+      // For round 3, nothing is visible (all draggable)
+      return [];
+    } else if (currentRound === 2) {
+      // For round 2, show only first 1/3 of each visible part
+      return answerData.visibleParts.map(part => {
+        const words = part.split(' ');
+        const oneThirdLength = Math.floor(words.length / 3);
+        return words.slice(0, oneThirdLength).join(' ');
+      });
+    }
+    // For round 1, show all visible parts
+    return answerData.visibleParts;
   };
 
   const getInitialDroppableLength = () => {
     if (currentRound === 3) {
       // For round 3, everything needs a gap
       return answerData.visibleParts.length + answerData.segments.length;
+    } else if (currentRound === 2) {
+      // For round 2, we need gaps for the 2/3 parts of visible text plus original segments
+      return answerData.visibleParts.length + answerData.segments.length;
     }
-    // For rounds 1 and 2, only segment spaces need gaps
+    // For round 1, only segment spaces need gaps
     return answerData.segments.length;
   };
 
@@ -46,11 +73,13 @@ export const DragAndDropQuestion = ({
     new Array(getInitialDroppableLength()).fill(null)
   );
   const [hasSubmitted, setHasSubmitted] = useState(false);
+  const [visibleParts, setVisibleParts] = useState(getVisibleParts());
 
   // Reset the state when the round changes
   useEffect(() => {
     setSegments(getInitialSegments());
     setDroppedSegments(new Array(getInitialDroppableLength()).fill(null));
+    setVisibleParts(getVisibleParts());
     setHasSubmitted(false);
   }, [currentRound, answerData.segments, answerData.visibleParts]);
 
@@ -130,17 +159,15 @@ export const DragAndDropQuestion = ({
                 ))
               ) : (
                 // Rounds 1 and 2: Show visible parts with gaps for segments
-                answerData.visibleParts?.map((part, index) => (
+                visibleParts.map((part, index) => (
                   <div key={`answer-section-${index}`} className="space-y-3">
                     <div className="p-4 bg-white border border-brand-200 rounded-lg shadow-sm">
                       <p className="text-brand-700">{part}</p>
                     </div>
-                    {index < answerData.segments.length && (
-                      <DroppableGap 
-                        index={index}
-                        content={droppedSegments[index]}
-                      />
-                    )}
+                    <DroppableGap 
+                      index={index}
+                      content={droppedSegments[index]}
+                    />
                   </div>
                 ))
               )}
