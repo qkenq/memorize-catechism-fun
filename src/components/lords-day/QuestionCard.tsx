@@ -72,29 +72,30 @@ export const QuestionCard = ({
   };
 
   return (
-    <Card className="p-6 mb-8 animate-fade-in">
+    <Card className="p-6 mb-8 animate-fade-in w-full max-w-none">
       <div className="space-y-6">
-        <QuestionSection question={question} />
-
         {questionType === 'standard' ? (
-          showAnswer ? (
-            <AnswerSection 
-              answer={question.answer}
-              onSelfScore={onSelfScore}
-            />
-          ) : (
-            <div className="space-y-4">
-              <p className="text-brand-600 italic">
-                Take a moment to think about or write down your answer before revealing the correct one.
-              </p>
-              <Button 
-                onClick={onShowAnswer}
-                className="w-full hover:scale-105 transition-transform"
-              >
-                Show Answer
-              </Button>
-            </div>
-          )
+          <>
+            <QuestionSection question={question} />
+            {showAnswer ? (
+              <AnswerSection 
+                answer={question.answer}
+                onSelfScore={onSelfScore}
+              />
+            ) : (
+              <div className="space-y-4">
+                <p className="text-brand-600 italic">
+                  Take a moment to think about or write down your answer before revealing the correct one.
+                </p>
+                <Button 
+                  onClick={onShowAnswer}
+                  className="w-full hover:scale-105 transition-transform"
+                >
+                  Show Answer
+                </Button>
+              </div>
+            )}
+          </>
         ) : questionType === 'fillInBlank' ? (
           <FillInBlankQuestion
             question={question.question}
@@ -103,7 +104,6 @@ export const QuestionCard = ({
           />
         ) : (
           <DragAndDropQuestion
-            question={question.question}
             answerData={prepareAnswerSegments() as DragAndDropAnswer}
             onAnswer={handleInteractiveAnswer}
           />
