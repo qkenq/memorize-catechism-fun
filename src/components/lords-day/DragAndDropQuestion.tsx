@@ -45,25 +45,20 @@ export const DragAndDropQuestion = ({
         <p className="mb-6">{question}</p>
         
         <div className="grid md:grid-cols-2 gap-8">
-          {/* Left column: Fixed text with gaps */}
+          {/* Left column: Text with interspersed gaps */}
           <div className="space-y-4">
-            <h3 className="font-medium text-brand-800 mb-4">Answer Text:</h3>
+            <h3 className="font-medium text-brand-800 mb-4">Complete the answer:</h3>
             <div className="space-y-3">
-              {answerData.visibleParts?.map((visiblePart, index) => (
-                <div 
-                  key={`visible-${index}`} 
-                  className="p-4 bg-white border border-brand-200 rounded-lg shadow-sm"
-                >
-                  <p className="text-brand-700">{visiblePart}</p>
-                </div>
-              ))}
-              {/* Gaps visualization */}
-              {segments.map((_, index) => (
-                <div 
-                  key={`gap-${index}`} 
-                  className="p-4 border-2 border-dashed border-brand-300 bg-brand-50/50 rounded-lg"
-                >
-                  <p className="text-brand-400 text-center">Drag a phrase here</p>
+              {answerData.visibleParts?.map((part, index) => (
+                <div key={`answer-section-${index}`} className="space-y-3">
+                  <div className="p-4 bg-white border border-brand-200 rounded-lg shadow-sm">
+                    <p className="text-brand-700">{part}</p>
+                  </div>
+                  {index < segments.length && (
+                    <div className="p-4 border-2 border-dashed border-brand-300 bg-brand-50/50 rounded-lg">
+                      <p className="text-brand-400 text-center">Drag the next phrase here</p>
+                    </div>
+                  )}
                 </div>
               ))}
             </div>
@@ -71,7 +66,7 @@ export const DragAndDropQuestion = ({
 
           {/* Right column: Draggable segments */}
           <div>
-            <h3 className="font-medium text-brand-800 mb-4">Drag these phrases to complete the answer:</h3>
+            <h3 className="font-medium text-brand-800 mb-4">Available phrases:</h3>
             <DragDropContext onDragEnd={handleDragEnd}>
               <Droppable droppableId="droppable">
                 {(provided) => (
