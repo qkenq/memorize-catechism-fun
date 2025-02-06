@@ -16,7 +16,5 @@ export interface Question {
   answer: string;
   type?: 'standard' | 'fillInBlank' | 'dragAndDrop';
   dragAndDropData?: DragAndDropAnswer;
-  round2Data?: DragAndDropAnswer;
-  round3Data?: DragAndDropAnswer;
   fillInBlankData?: FillInBlankAnswer;
 }
