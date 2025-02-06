@@ -1,9 +1,10 @@
 import { useState } from "react";
 import { DragDropContext, Droppable } from "@hello-pangea/dnd";
-import { DroppableGap } from "@/components/lords-day/DroppableGap";
 import { DraggableSegment } from "@/components/lords-day/DraggableSegment";
+import { GapDropZone } from "./GapDropZone";
 import { Button } from "@/components/ui/button";
 import { toast } from "@/components/ui/use-toast";
+import { cn } from "@/lib/utils";
 
 interface QuizPreviewProps {
   quiz: {
@@ -19,7 +20,7 @@ export const QuizPreview = ({ quiz }: QuizPreviewProps) => {
   const [droppedSegments, setDroppedSegments] = useState<(string | null)[]>(
     new Array(quiz.gap_text.length).fill(null)
   );
-  const [hasSubmitted, setHasSubmitted] = useState(false);
+  const [showFeedback, setShowFeedback] = useState(false);
 
   const handleDragEnd = (result: any) => {
     if (!result.destination) return;
@@ -46,6 +47,7 @@ export const QuizPreview = ({ quiz }: QuizPreviewProps) => {
 
       setDroppedSegments(newDroppedSegments);
       setSegments(newSegments);
+      setShowFeedback(false);
     }
   };
 
@@ -59,6 +61,7 @@ export const QuizPreview = ({ quiz }: QuizPreviewProps) => {
       return;
     }
     
+    setShowFeedback(true);
     const isCorrect = droppedSegments.every((segment, index) => 
       segment === quiz.gap_text[index]
     );
@@ -70,14 +73,29 @@ export const QuizPreview = ({ quiz }: QuizPreviewProps) => {
         : "Some answers are incorrect. Would you like to try again?",
       variant: isCorrect ? "default" : "destructive",
     });
-
-    setHasSubmitted(true);
   };
 
   const handleReset = () => {
     setSegments(quiz.gap_text);
     setDroppedSegments(new Array(quiz.gap_text.length).fill(null));
-    setHasSubmitted(false);
+    setShowFeedback(false);
+  };
+
+  const renderTextWithGaps = (text: string, gapIndexOffset: number) => {
+    const parts = text.split('_____');
+    return parts.map((part, index) => (
+      <span key={index}>
+        {part}
+        {index < parts.length - 1 && (
+          <GapDropZone
+            index={gapIndexOffset + index}
+            content={droppedSegments[gapIndexOffset + index]}
+            isCorrect={showFeedback && droppedSegments[gapIndexOffset + index] === quiz.gap_text[gapIndexOffset + index]}
+            showFeedback={showFeedback}
+          />
+        )}
+      </span>
+    ));
   };
 
   return (
@@ -85,26 +103,33 @@ export const QuizPreview = ({ quiz }: QuizPreviewProps) => {
       <h2 className="text-xl font-semibold text-brand-800">{quiz.title}</h2>
       
       <DragDropContext onDragEnd={handleDragEnd}>
-        <div className="grid md:grid-cols-2 gap-8">
-          {/* Left column: Text with gaps */}
-          <div className="space-y-4">
-            <div className="space-y-3">
-              {quiz.visible_text.map((part, index) => (
-                <div key={`answer-section-${index}`} className="space-y-3">
-                  <div className="p-4 bg-white border border-brand-200 rounded-lg shadow-sm">
-                    <p className="text-brand-700">{part}</p>
-                  </div>
-                  <DroppableGap 
-                    index={index}
-                    content={droppedSegments[index]}
-                  />
+        <div className="grid gap-8">
+          {/* Text with inline gaps */}
+          <div className="space-y-4 text-lg leading-relaxed">
+            {quiz.visible_text.map((part, partIndex) => {
+              const gapIndexOffset = partIndex > 0 
+                ? quiz.visible_text.slice(0, partIndex).reduce(
+                    (acc, text) => acc + (text.match(/_____/g) || []).length, 
+                    0
+                  ) 
+                : 0;
+              
+              return (
+                <div 
+                  key={partIndex}
+                  className={cn(
+                    "p-4 bg-white border border-brand-200 rounded-lg shadow-sm",
+                    "transition-all duration-300"
+                  )}
+                >
+                  {renderTextWithGaps(part, gapIndexOffset)}
                 </div>
-              ))}
-            </div>
+              );
+            })}
           </div>
 
-          {/* Right column: Draggable segments */}
-          {!hasSubmitted && segments.length > 0 && (
+          {/* Available phrases */}
+          {segments.length > 0 && (
             <div className="animate-fade-in">
               <h3 className="font-medium text-brand-800 mb-4">Available phrases:</h3>
               <Droppable droppableId="available-segments">
@@ -131,22 +156,20 @@ export const QuizPreview = ({ quiz }: QuizPreviewProps) => {
       </DragDropContext>
 
       <div className="flex gap-4">
-        {!hasSubmitted ? (
-          <Button 
-            onClick={handleSubmit}
-            className="w-full"
-            disabled={droppedSegments.includes(null)}
-          >
-            Submit Answer
-          </Button>
-        ) : (
-          <Button 
-            onClick={handleReset}
-            className="w-full"
-          >
-            Try Again
-          </Button>
-        )}
+        <Button 
+          onClick={handleSubmit}
+          className="flex-1"
+          disabled={droppedSegments.includes(null)}
+        >
+          Check Answers
+        </Button>
+        <Button 
+          onClick={handleReset}
+          variant="outline"
+          className="flex-1"
+        >
+          Reset
+        </Button>
       </div>
     </div>
   );

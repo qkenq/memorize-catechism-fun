@@ -1,13 +1,13 @@
-
-import type { Config } from "tailwindcss";
+import { type Config } from "tailwindcss";
+import { fontFamily } from "tailwindcss/defaultTheme";
 
 export default {
   darkMode: ["class"],
   content: [
-    "./pages/**/*.{ts,tsx}",
-    "./components/**/*.{ts,tsx}",
-    "./app/**/*.{ts,tsx}",
-    "./src/**/*.{ts,tsx}",
+    './pages/**/*.{ts,tsx}',
+    './components/**/*.{ts,tsx}',
+    './app/**/*.{ts,tsx}',
+    './src/**/*.{ts,tsx}',
   ],
   prefix: "",
   theme: {
@@ -25,30 +25,6 @@ export default {
         ring: "hsl(var(--ring))",
         background: "hsl(var(--background))",
         foreground: "hsl(var(--foreground))",
-        brand: {
-          50: "#f8f9fa",
-          100: "#f1f3f5",
-          200: "#e9ecef",
-          300: "#dee2e6",
-          400: "#ced4da",
-          500: "#adb5bd",
-          600: "#868e96",
-          700: "#495057",
-          800: "#343a40",
-          900: "#212529",
-        },
-        sage: {
-          50: "#f8faf8",
-          100: "#e8f1e8",
-          200: "#d1e4d1",
-          300: "#b3d1b3",
-          400: "#8fb88f",
-          500: "#6b9b6b",
-          600: "#507a50",
-          700: "#3c5c3c",
-          800: "#2b3f2b",
-          900: "#1a231a",
-        },
         primary: {
           DEFAULT: "hsl(var(--primary))",
           foreground: "hsl(var(--primary-foreground))",
@@ -83,6 +59,9 @@ export default {
         md: "calc(var(--radius) - 2px)",
         sm: "calc(var(--radius) - 4px)",
       },
+      fontFamily: {
+        sans: ["var(--font-sans)", ...fontFamily.sans],
+      },
       keyframes: {
         "accordion-down": {
           from: { height: "0" },
@@ -92,17 +71,18 @@ export default {
           from: { height: "var(--radix-accordion-content-height)" },
           to: { height: "0" },
         },
-        "fade-in": {
-          "0%": { opacity: "0", transform: "translateY(10px)" },
-          "100%": { opacity: "1", transform: "translateY(0)" },
+        shake: {
+          "0%, 100%": { transform: "translateX(0)" },
+          "25%": { transform: "translateX(-4px)" },
+          "75%": { transform: "translateX(4px)" },
         },
       },
       animation: {
         "accordion-down": "accordion-down 0.2s ease-out",
         "accordion-up": "accordion-up 0.2s ease-out",
-        "fade-in": "fade-in 0.3s ease-out",
+        "shake": "shake 0.3s ease-in-out",
       },
     },
   },
   plugins: [require("tailwindcss-animate")],
-} satisfies Config;
+} satisfies Config
