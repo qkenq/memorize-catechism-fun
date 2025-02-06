@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { DragDropContext } from "@hello-pangea/dnd";
+import { DragDropContext, Droppable } from "@hello-pangea/dnd";
 import { DroppableGap } from "@/components/lords-day/DroppableGap";
 import { DraggableSegment } from "@/components/lords-day/DraggableSegment";
 import { Button } from "@/components/ui/button";
@@ -81,15 +81,24 @@ export const QuizPreview = ({ quiz }: QuizPreviewProps) => {
           {!hasSubmitted && segments.length > 0 && (
             <div>
               <h3 className="font-medium text-brand-800 mb-4">Available phrases:</h3>
-              <div className="space-y-3">
-                {segments.map((segment, index) => (
-                  <DraggableSegment 
-                    key={segment}
-                    segment={segment}
-                    index={index}
-                  />
-                ))}
-              </div>
+              <Droppable droppableId="available-segments">
+                {(provided) => (
+                  <div
+                    {...provided.droppableProps}
+                    ref={provided.innerRef}
+                    className="space-y-3"
+                  >
+                    {segments.map((segment, index) => (
+                      <DraggableSegment 
+                        key={segment}
+                        segment={segment}
+                        index={index}
+                      />
+                    ))}
+                    {provided.placeholder}
+                  </div>
+                )}
+              </Droppable>
             </div>
           )}
         </div>
