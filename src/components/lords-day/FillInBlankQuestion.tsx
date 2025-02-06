@@ -7,12 +7,16 @@ interface FillInBlankQuestionProps {
   question: string;
   answerData: FillInBlankAnswer;
   onAnswer: (isCorrect: boolean) => void;
+  questionNumber: number;
+  totalQuestions: number;
 }
 
 export const FillInBlankQuestion = ({
   question,
   answerData,
   onAnswer,
+  questionNumber,
+  totalQuestions,
 }: FillInBlankQuestionProps) => {
   const [userAnswer, setUserAnswer] = useState("");
   const [hasSubmitted, setHasSubmitted] = useState(false);
@@ -25,8 +29,15 @@ export const FillInBlankQuestion = ({
 
   return (
     <div className="space-y-4">
+      <div className="text-sm text-brand-600 mb-4">
+        Question {questionNumber} of {totalQuestions}
+      </div>
+      
+      <div className="text-lg text-brand-700 leading-relaxed mb-6">
+        {question}
+      </div>
+
       <div className="text-lg text-brand-700 leading-relaxed space-y-4">
-        <p>{question}</p>
         <div className="p-4 bg-brand-50 rounded-lg">
           <p className="text-brand-600 mb-4">Complete the answer:</p>
           <div className="space-y-2">

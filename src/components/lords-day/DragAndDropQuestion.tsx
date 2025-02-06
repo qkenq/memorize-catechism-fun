@@ -4,15 +4,22 @@ import type { DragAndDropAnswer } from "@/data/catechism/questionTypes";
 import { DragDropContext, Droppable } from "@hello-pangea/dnd";
 import { DraggableSegment } from "./DraggableSegment";
 import { DroppableGap } from "./DroppableGap";
+import { QuestionSection } from "./QuestionSection";
 
 interface DragAndDropQuestionProps {
+  question: string;
   answerData: DragAndDropAnswer;
   onAnswer: (isCorrect: boolean) => void;
+  questionNumber: number;
+  totalQuestions: number;
 }
 
 export const DragAndDropQuestion = ({
+  question,
   answerData,
   onAnswer,
+  questionNumber,
+  totalQuestions,
 }: DragAndDropQuestionProps) => {
   const [segments, setSegments] = useState([...answerData.segments]);
   const [droppedSegments, setDroppedSegments] = useState<(string | null)[]>(
@@ -66,6 +73,14 @@ export const DragAndDropQuestion = ({
 
   return (
     <div className="space-y-4 w-full">
+      <div className="text-sm text-brand-600 mb-4">
+        Question {questionNumber} of {totalQuestions}
+      </div>
+      
+      <div className="text-lg text-brand-700 leading-relaxed mb-6">
+        {question}
+      </div>
+
       <DragDropContext onDragEnd={handleDragEnd}>
         <div className="grid md:grid-cols-2 gap-8">
           {/* Left column: Text with gaps */}

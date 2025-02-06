@@ -15,6 +15,8 @@ interface QuestionCardProps {
   onSelfScore: (understood: boolean) => void;
   userLevel?: number;
   currentRound?: number;
+  questionNumber: number;
+  totalQuestions: number;
 }
 
 export const QuestionCard = ({
@@ -24,6 +26,8 @@ export const QuestionCard = ({
   onSelfScore,
   userLevel = 1,
   currentRound = 1,
+  questionNumber,
+  totalQuestions,
 }: QuestionCardProps) => {
   const [completedFillInBlank, setCompletedFillInBlank] = useState(false);
   const [interactiveScore, setInteractiveScore] = useState<boolean | null>(null);
@@ -78,7 +82,11 @@ export const QuestionCard = ({
       <div className="space-y-6">
         {questionType === 'standard' ? (
           <>
-            <QuestionSection question={question} />
+            <QuestionSection 
+              question={question} 
+              questionNumber={questionNumber}
+              totalQuestions={totalQuestions}
+            />
             {showAnswer ? (
               <AnswerSection 
                 answer={question.answer}
@@ -103,11 +111,16 @@ export const QuestionCard = ({
             question={question.question}
             answerData={prepareAnswerSegments() as FillInBlankAnswer}
             onAnswer={handleInteractiveAnswer}
+            questionNumber={questionNumber}
+            totalQuestions={totalQuestions}
           />
         ) : (
           <DragAndDropQuestion
+            question={question.question}
             answerData={prepareAnswerSegments() as DragAndDropAnswer}
             onAnswer={handleInteractiveAnswer}
+            questionNumber={questionNumber}
+            totalQuestions={totalQuestions}
           />
         )}
 
