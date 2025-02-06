@@ -45,7 +45,7 @@ const LordsDays = () => {
     },
     enabled: !!userId,
     staleTime: 0, // This ensures we always get fresh data
-    cacheTime: 0  // This ensures the cache is cleared immediately
+    gcTime: 0  // This ensures the garbage collection happens immediately (formerly cacheTime)
   });
 
   // Force refetch when component mounts
