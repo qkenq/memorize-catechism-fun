@@ -156,7 +156,7 @@ const LordsDay = () => {
       <Navigation />
       
       <main className="pt-24 px-4 pb-12">
-        <div className="max-w-4xl mx-auto">
+        <div className="container max-w-[1600px] mx-auto">
           <ProgressHeader
             title={lordsDay.title}
             totalTimeSpent={progress?.total_time_spent || 0}
