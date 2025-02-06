@@ -20,11 +20,18 @@ export default function QuizManagement() {
     e.preventDefault();
 
     try {
+      const { data: { user } } = await supabase.auth.getUser();
+      
+      if (!user) {
+        throw new Error("User not authenticated");
+      }
+
       const { error } = await supabase.from("quizzes").insert({
         title,
         type: "fill_in_blank",
         visible_text: visibleText.split("\n").filter(text => text.trim()),
         gap_text: gapText.split("\n").filter(text => text.trim()),
+        created_by: user.id
       });
 
       if (error) throw error;
