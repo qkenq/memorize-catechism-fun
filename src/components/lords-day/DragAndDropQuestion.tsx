@@ -56,45 +56,45 @@ export const DragAndDropQuestion = ({
       <div className="text-lg text-brand-700 leading-relaxed">
         <p className="mb-6">{question}</p>
         
-        <div className="grid md:grid-cols-2 gap-8">
-          {/* Left column: Text with interspersed gaps */}
-          <div className="space-y-4">
-            <h3 className="font-medium text-brand-800 mb-4">Complete the answer:</h3>
-            <div className="space-y-3">
-              {answerData.visibleParts?.map((part, index) => (
-                <div key={`answer-section-${index}`} className="space-y-3">
-                  <div className="p-4 bg-white border border-brand-200 rounded-lg shadow-sm">
-                    <p className="text-brand-700">{part}</p>
+        <DragDropContext onDragEnd={handleDragEnd}>
+          <div className="grid md:grid-cols-2 gap-8">
+            {/* Left column: Text with interspersed gaps */}
+            <div className="space-y-4">
+              <h3 className="font-medium text-brand-800 mb-4">Complete the answer:</h3>
+              <div className="space-y-3">
+                {answerData.visibleParts?.map((part, index) => (
+                  <div key={`answer-section-${index}`} className="space-y-3">
+                    <div className="p-4 bg-white border border-brand-200 rounded-lg shadow-sm">
+                      <p className="text-brand-700">{part}</p>
+                    </div>
+                    {index < answerData.segments.length && (
+                      <Droppable droppableId={`gap-${index}`}>
+                        {(provided, snapshot) => (
+                          <div
+                            ref={provided.innerRef}
+                            {...provided.droppableProps}
+                            className={`p-4 border-2 border-dashed ${
+                              snapshot.isDraggingOver ? 'border-brand-500 bg-brand-100' : 'border-brand-300 bg-brand-50/50'
+                            } rounded-lg min-h-[60px] transition-colors`}
+                          >
+                            {droppedSegments[index] ? (
+                              <p className="text-brand-700">{droppedSegments[index]}</p>
+                            ) : (
+                              <p className="text-brand-400 text-center">Drag a phrase here</p>
+                            )}
+                            {provided.placeholder}
+                          </div>
+                        )}
+                      </Droppable>
+                    )}
                   </div>
-                  {index < answerData.segments.length && (
-                    <Droppable droppableId={`gap-${index}`}>
-                      {(provided, snapshot) => (
-                        <div
-                          ref={provided.innerRef}
-                          {...provided.droppableProps}
-                          className={`p-4 border-2 border-dashed ${
-                            snapshot.isDraggingOver ? 'border-brand-500 bg-brand-100' : 'border-brand-300 bg-brand-50/50'
-                          } rounded-lg min-h-[60px] transition-colors`}
-                        >
-                          {droppedSegments[index] ? (
-                            <p className="text-brand-700">{droppedSegments[index]}</p>
-                          ) : (
-                            <p className="text-brand-400 text-center">Drag a phrase here</p>
-                          )}
-                          {provided.placeholder}
-                        </div>
-                      )}
-                    </Droppable>
-                  )}
-                </div>
-              ))}
+                ))}
+              </div>
             </div>
-          </div>
 
-          {/* Right column: Draggable segments */}
-          <div>
-            <h3 className="font-medium text-brand-800 mb-4">Available phrases:</h3>
-            <DragDropContext onDragEnd={handleDragEnd}>
+            {/* Right column: Draggable segments */}
+            <div>
+              <h3 className="font-medium text-brand-800 mb-4">Available phrases:</h3>
               <Droppable droppableId="available-segments">
                 {(provided) => (
                   <div
@@ -123,9 +123,9 @@ export const DragAndDropQuestion = ({
                   </div>
                 )}
               </Droppable>
-            </DragDropContext>
+            </div>
           </div>
-        </div>
+        </DragDropContext>
       </div>
 
       {!hasSubmitted && (
