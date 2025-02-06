@@ -3,6 +3,7 @@ import { DragDropContext, Droppable } from "@hello-pangea/dnd";
 import { DroppableGap } from "@/components/lords-day/DroppableGap";
 import { DraggableSegment } from "@/components/lords-day/DraggableSegment";
 import { Button } from "@/components/ui/button";
+import { toast } from "@/components/ui/use-toast";
 
 interface QuizPreviewProps {
   quiz: {
@@ -29,6 +30,11 @@ export const QuizPreview = ({ quiz }: QuizPreviewProps) => {
       const gapIndex = parseInt(destination.droppableId.split('-')[1]);
       
       if (droppedSegments[gapIndex] !== null) {
+        toast({
+          title: "Gap already filled",
+          description: "Please drag to an empty gap.",
+          variant: "destructive",
+        });
         return;
       }
 
@@ -44,7 +50,27 @@ export const QuizPreview = ({ quiz }: QuizPreviewProps) => {
   };
 
   const handleSubmit = () => {
-    if (droppedSegments.includes(null)) return;
+    if (droppedSegments.includes(null)) {
+      toast({
+        title: "Incomplete",
+        description: "Please fill all gaps before submitting.",
+        variant: "destructive",
+      });
+      return;
+    }
+    
+    const isCorrect = droppedSegments.every((segment, index) => 
+      segment === quiz.gap_text[index]
+    );
+
+    toast({
+      title: isCorrect ? "Correct!" : "Try Again",
+      description: isCorrect 
+        ? "Great job! You've completed the quiz correctly." 
+        : "Some answers are incorrect. Would you like to try again?",
+      variant: isCorrect ? "default" : "destructive",
+    });
+
     setHasSubmitted(true);
   };
 
@@ -55,7 +81,7 @@ export const QuizPreview = ({ quiz }: QuizPreviewProps) => {
   };
 
   return (
-    <div className="space-y-6 p-6">
+    <div className="space-y-6 p-6 animate-fade-in">
       <h2 className="text-xl font-semibold text-brand-800">{quiz.title}</h2>
       
       <DragDropContext onDragEnd={handleDragEnd}>
@@ -79,7 +105,7 @@ export const QuizPreview = ({ quiz }: QuizPreviewProps) => {
 
           {/* Right column: Draggable segments */}
           {!hasSubmitted && segments.length > 0 && (
-            <div>
+            <div className="animate-fade-in">
               <h3 className="font-medium text-brand-800 mb-4">Available phrases:</h3>
               <Droppable droppableId="available-segments">
                 {(provided) => (
