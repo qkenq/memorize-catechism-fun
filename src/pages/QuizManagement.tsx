@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { Eye, PlayCircle } from "lucide-react";
+import { Eye, PlayCircle, Pencil } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   Table,
@@ -23,6 +23,7 @@ import { supabase } from "@/integrations/supabase/client";
 export default function QuizManagement() {
   const [previewQuiz, setPreviewQuiz] = useState<any>(null);
   const [showStudentPreview, setShowStudentPreview] = useState(false);
+  const [editingQuiz, setEditingQuiz] = useState<any>(null);
 
   // Fetch quizzes
   const { data: quizzes, isLoading, refetch } = useQuery({
@@ -59,10 +60,27 @@ export default function QuizManagement() {
       <h1 className="text-2xl font-bold mb-6">Quiz Management</h1>
       
       <div className="space-y-8">
-        {/* Create Quiz Form */}
+        {/* Create/Edit Quiz Form */}
         <div className="bg-card p-6 rounded-lg border">
-          <h2 className="text-xl font-semibold mb-4">Create New Quiz</h2>
-          <QuizEditor onQuizCreated={refetch} />
+          <h2 className="text-xl font-semibold mb-4">
+            {editingQuiz ? "Edit Quiz" : "Create New Quiz"}
+          </h2>
+          <QuizEditor 
+            quiz={editingQuiz} 
+            onQuizCreated={() => {
+              refetch();
+              setEditingQuiz(null);
+            }} 
+          />
+          {editingQuiz && (
+            <Button 
+              variant="outline" 
+              onClick={() => setEditingQuiz(null)}
+              className="mt-4"
+            >
+              Cancel Editing
+            </Button>
+          )}
         </div>
 
         {/* Quiz List */}
@@ -77,7 +95,7 @@ export default function QuizManagement() {
                   <TableHead>Title</TableHead>
                   <TableHead>Type</TableHead>
                   <TableHead>Created At</TableHead>
-                  <TableHead className="w-[140px]">Actions</TableHead>
+                  <TableHead className="w-[180px]">Actions</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -107,6 +125,16 @@ export default function QuizManagement() {
                           }}
                         >
                           <PlayCircle className="h-4 w-4" />
+                        </Button>
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          onClick={() => {
+                            setEditingQuiz(quiz);
+                            window.scrollTo({ top: 0, behavior: 'smooth' });
+                          }}
+                        >
+                          <Pencil className="h-4 w-4" />
                         </Button>
                       </div>
                     </TableCell>

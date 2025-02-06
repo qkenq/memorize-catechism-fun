@@ -1,4 +1,4 @@
-import React, { useState, useCallback } from 'react';
+import React, { useState, useCallback, useEffect } from 'react';
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
@@ -7,13 +7,21 @@ import { useToast } from "@/components/ui/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 
 interface QuizEditorProps {
+  quiz?: any;
   onQuizCreated?: () => void;
 }
 
-export const QuizEditor = ({ onQuizCreated }: QuizEditorProps) => {
+export const QuizEditor = ({ quiz, onQuizCreated }: QuizEditorProps) => {
   const [title, setTitle] = useState("");
   const [content, setContent] = useState("");
   const { toast } = useToast();
+
+  useEffect(() => {
+    if (quiz) {
+      setTitle(quiz.title);
+      setContent(quiz.full_text || "");
+    }
+  }, [quiz]);
 
   const handleContentChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
     setContent(e.target.value);
@@ -51,32 +59,56 @@ export const QuizEditor = ({ onQuizCreated }: QuizEditorProps) => {
 
       const { extracted_text, gaps } = processGaps(content);
 
-      const { error } = await supabase.from("quizzes").insert({
-        title,
-        full_text: content,
-        gaps,
-        type: "fill_in_blank",
-        visible_text: [extracted_text],
-        gap_text: gaps.map(g => g.answer),
-        created_by: user.id
-      });
+      if (quiz) {
+        // Update existing quiz
+        const { error } = await supabase
+          .from("quizzes")
+          .update({
+            title,
+            full_text: content,
+            gaps,
+            type: "fill_in_blank",
+            visible_text: [extracted_text],
+            gap_text: gaps.map(g => g.answer),
+            updated_at: new Date().toISOString()
+          })
+          .eq('id', quiz.id);
 
-      if (error) throw error;
+        if (error) throw error;
 
-      toast({
-        title: "Success",
-        description: "Quiz created successfully",
-      });
+        toast({
+          title: "Success",
+          description: "Quiz updated successfully",
+        });
+      } else {
+        // Create new quiz
+        const { error } = await supabase.from("quizzes").insert({
+          title,
+          full_text: content,
+          gaps,
+          type: "fill_in_blank",
+          visible_text: [extracted_text],
+          gap_text: gaps.map(g => g.answer),
+          created_by: user.id
+        });
+
+        if (error) throw error;
+
+        toast({
+          title: "Success",
+          description: "Quiz created successfully",
+        });
+      }
 
       setTitle("");
       setContent("");
       onQuizCreated?.();
     } catch (error) {
-      console.error("Error creating quiz:", error);
+      console.error("Error saving quiz:", error);
       toast({
         variant: "destructive",
         title: "Error",
-        description: "Failed to create quiz. Please try again.",
+        description: "Failed to save quiz. Please try again.",
       });
     }
   };
@@ -132,7 +164,7 @@ export const QuizEditor = ({ onQuizCreated }: QuizEditorProps) => {
       {content && renderPreview()}
 
       <Button type="submit" className="w-full">
-        Create Quiz
+        {quiz ? "Update Quiz" : "Create Quiz"}
       </Button>
     </form>
   );
