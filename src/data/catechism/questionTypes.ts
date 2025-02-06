@@ -1,4 +1,8 @@
-export type QuestionType = 'standard' | 'fillInBlank' | 'dragAndDrop';
+export interface DragAndDropAnswer {
+  visibleParts: string[];
+  segments: string[];
+  correctOrder: number[];
+}
 
 export interface FillInBlankAnswer {
   beforeBlank: string;
@@ -6,17 +10,13 @@ export interface FillInBlankAnswer {
   afterBlank: string;
 }
 
-export interface DragAndDropAnswer {
-  segments: string[];      // The portions to be dragged
-  correctOrder: number[];  // The correct order of the segments
-  visibleParts?: string[]; // Made optional with ?
-}
-
 export interface Question {
   id: number;
   question: string;
   answer: string;
-  type?: QuestionType;
-  fillInBlankData?: FillInBlankAnswer;
+  type?: 'standard' | 'fillInBlank' | 'dragAndDrop';
   dragAndDropData?: DragAndDropAnswer;
+  round2Data?: DragAndDropAnswer;
+  round3Data?: DragAndDropAnswer;
+  fillInBlankData?: FillInBlankAnswer;
 }
