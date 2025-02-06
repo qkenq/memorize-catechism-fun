@@ -14,6 +14,7 @@ interface QuestionCardProps {
   onShowAnswer: () => void;
   onSelfScore: (understood: boolean) => void;
   userLevel?: number;
+  currentRound?: number;
 }
 
 export const QuestionCard = ({
@@ -22,6 +23,7 @@ export const QuestionCard = ({
   onShowAnswer,
   onSelfScore,
   userLevel = 1,
+  currentRound = 1,
 }: QuestionCardProps) => {
   const [completedFillInBlank, setCompletedFillInBlank] = useState(false);
   const [interactiveScore, setInteractiveScore] = useState<boolean | null>(null);
@@ -113,6 +115,14 @@ export const QuestionCard = ({
           <div className="mt-4 p-4 bg-brand-50 rounded-lg">
             <p className="text-brand-700">
               Great job with the fill-in-the-blank! Now try to arrange the remaining parts in the correct order.
+            </p>
+          </div>
+        )}
+
+        {currentRound > 1 && (
+          <div className="mt-4 p-4 bg-brand-50 rounded-lg">
+            <p className="text-brand-700">
+              Round {currentRound}: Keep practicing to reinforce your learning!
             </p>
           </div>
         )}

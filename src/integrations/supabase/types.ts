@@ -80,6 +80,7 @@ export type Database = {
       progress: {
         Row: {
           completed_at: string
+          current_round: number
           id: string
           last_attempt_date: string | null
           level: number
@@ -90,6 +91,7 @@ export type Database = {
         }
         Insert: {
           completed_at?: string
+          current_round?: number
           id?: string
           last_attempt_date?: string | null
           level?: number
@@ -100,6 +102,7 @@ export type Database = {
         }
         Update: {
           completed_at?: string
+          current_round?: number
           id?: string
           last_attempt_date?: string | null
           level?: number
