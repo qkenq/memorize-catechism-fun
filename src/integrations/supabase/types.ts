@@ -147,8 +147,11 @@ export type Database = {
         Row: {
           created_at: string
           created_by: string
+          full_text: string | null
           gap_text: string[]
+          gaps: Json[] | null
           id: string
+          input_type: Database["public"]["Enums"]["quiz_type"][] | null
           title: string
           type: Database["public"]["Enums"]["quiz_type"]
           updated_at: string
@@ -157,8 +160,11 @@ export type Database = {
         Insert: {
           created_at?: string
           created_by: string
+          full_text?: string | null
           gap_text: string[]
+          gaps?: Json[] | null
           id?: string
+          input_type?: Database["public"]["Enums"]["quiz_type"][] | null
           title: string
           type?: Database["public"]["Enums"]["quiz_type"]
           updated_at?: string
@@ -167,8 +173,11 @@ export type Database = {
         Update: {
           created_at?: string
           created_by?: string
+          full_text?: string | null
           gap_text?: string[]
+          gaps?: Json[] | null
           id?: string
+          input_type?: Database["public"]["Enums"]["quiz_type"][] | null
           title?: string
           type?: Database["public"]["Enums"]["quiz_type"]
           updated_at?: string
@@ -181,14 +190,24 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      process_text_gaps: {
+        Args: {
+          text_content: string
+        }
+        Returns: Record<string, unknown>
+      }
     }
     Enums: {
       app_role: "admin" | "member"
       quiz_type: "drag_and_drop" | "fill_in_blank" | "multiple_choice"
     }
     CompositeTypes: {
-      [_ in never]: never
+      gap_structure: {
+        answer: string | null
+        start_index: number | null
+        end_index: number | null
+        input_type: Database["public"]["Enums"]["quiz_type"] | null
+      }
     }
   }
 }
