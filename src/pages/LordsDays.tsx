@@ -28,10 +28,14 @@ const LordsDays = () => {
     return () => subscription.unsubscribe();
   }, []);
 
-  const { data: progress, refetch } = useQuery({
+  const { data: progress } = useQuery({
     queryKey: ['progress'],
     queryFn: async () => {
       if (!userId) return [];
+      
+      // Force clear the cache before fetching
+      await queryClient.invalidateQueries({ queryKey: ['progress'] });
+      
       const { data, error } = await supabase
         .from('progress')
         .select('*')
@@ -44,14 +48,11 @@ const LordsDays = () => {
       return data || [];
     },
     enabled: !!userId,
-    staleTime: 0, // This ensures we always get fresh data
-    gcTime: 0  // This ensures the garbage collection happens immediately (formerly cacheTime)
+    staleTime: 0,
+    gcTime: 0,
+    refetchOnMount: 'always',
+    refetchOnWindowFocus: true
   });
-
-  // Force refetch when component mounts
-  useEffect(() => {
-    refetch();
-  }, [refetch]);
 
   if (loading) {
     return <div>Loading...</div>;
