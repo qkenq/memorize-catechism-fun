@@ -22,18 +22,39 @@ export const DragAndDropQuestion = ({
   totalQuestions,
   currentRound,
 }: DragAndDropQuestionProps) => {
-  const [segments, setSegments] = useState([...answerData.segments]);
+  // Prepare segments based on the round
+  const getInitialSegments = () => {
+    if (currentRound === 2) {
+      // For round 2, include both visible parts and segments as draggable items
+      const allParts = [
+        ...answerData.visibleParts,
+        ...answerData.segments
+      ];
+      return allParts;
+    }
+    return [...answerData.segments];
+  };
+
+  const getInitialDroppableLength = () => {
+    if (currentRound === 2) {
+      // For round 2, we'll have gaps for all parts
+      return answerData.visibleParts.length + answerData.segments.length;
+    }
+    return answerData.segments.length;
+  };
+
+  const [segments, setSegments] = useState(getInitialSegments());
   const [droppedSegments, setDroppedSegments] = useState<(string | null)[]>(
-    new Array(answerData.segments.length).fill(null)
+    new Array(getInitialDroppableLength()).fill(null)
   );
   const [hasSubmitted, setHasSubmitted] = useState(false);
 
   // Reset the state when the round changes
   useEffect(() => {
-    setSegments([...answerData.segments]);
-    setDroppedSegments(new Array(answerData.segments.length).fill(null));
+    setSegments(getInitialSegments());
+    setDroppedSegments(new Array(getInitialDroppableLength()).fill(null));
     setHasSubmitted(false);
-  }, [currentRound, answerData.segments]);
+  }, [currentRound, answerData.segments, answerData.visibleParts]);
 
   const handleDragEnd = (result: any) => {
     if (!result.destination) return;
@@ -49,9 +70,12 @@ export const DragAndDropQuestion = ({
 
       const draggedSegment = segments[source.index];
       
-      const isCorrectPosition = gapIndex === answerData.correctOrder.findIndex(
-        index => answerData.segments[index] === draggedSegment
-      );
+      // In round 2, any segment can go in any position
+      const isCorrectPosition = currentRound === 2 
+        ? true 
+        : gapIndex === answerData.correctOrder.findIndex(
+            index => answerData.segments[index] === draggedSegment
+          );
 
       if (!isCorrectPosition) {
         return;
@@ -72,9 +96,12 @@ export const DragAndDropQuestion = ({
       return;
     }
 
-    const isCorrect = droppedSegments.every(
-      (segment, index) => segment === answerData.segments[answerData.correctOrder[index]]
-    );
+    const isCorrect = currentRound === 2
+      ? droppedSegments.join(' ') === answerData.visibleParts.concat(answerData.segments).join(' ')
+      : droppedSegments.every(
+          (segment, index) => segment === answerData.segments[answerData.correctOrder[index]]
+        );
+
     setHasSubmitted(true);
     onAnswer(isCorrect);
   };
@@ -94,19 +121,31 @@ export const DragAndDropQuestion = ({
           {/* Left column: Text with gaps */}
           <div className="space-y-4">
             <div className="space-y-3">
-              {answerData.visibleParts?.map((part, index) => (
-                <div key={`answer-section-${index}`} className="space-y-3">
-                  <div className="p-4 bg-white border border-brand-200 rounded-lg shadow-sm">
-                    <p className="text-brand-700">{part}</p>
+              {currentRound === 2 ? (
+                // In round 2, everything is a gap
+                Array.from({ length: getInitialDroppableLength() }).map((_, index) => (
+                  <DroppableGap 
+                    key={`gap-${index}`}
+                    index={index}
+                    content={droppedSegments[index]}
+                  />
+                ))
+              ) : (
+                // Round 1: Original behavior
+                answerData.visibleParts?.map((part, index) => (
+                  <div key={`answer-section-${index}`} className="space-y-3">
+                    <div className="p-4 bg-white border border-brand-200 rounded-lg shadow-sm">
+                      <p className="text-brand-700">{part}</p>
+                    </div>
+                    {index < answerData.segments.length && (
+                      <DroppableGap 
+                        index={index}
+                        content={droppedSegments[index]}
+                      />
+                    )}
                   </div>
-                  {index < answerData.segments.length && (
-                    <DroppableGap 
-                      index={index}
-                      content={droppedSegments[index]}
-                    />
-                  )}
-                </div>
-              ))}
+                ))
+              )}
             </div>
           </div>
 
