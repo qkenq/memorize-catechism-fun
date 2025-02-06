@@ -1,31 +1,30 @@
-import { Home, Book, Trophy, Menu, LogOut, User, RefreshCw } from "lucide-react";
 import { useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
-import { supabase } from "@/integrations/supabase/client";
-import { toast } from "sonner";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
+import { Link } from "react-router-dom";
+import { Menu, X, RefreshCw } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { useMobile } from "@/hooks/use-mobile";
+import { supabase } from "@/integrations/supabase/client";
+import { useToast } from "@/components/ui/use-toast";
+import { useQueryClient } from "@tanstack/react-query";
 
 export const Navigation = () => {
   const [isOpen, setIsOpen] = useState(false);
-  const navigate = useNavigate();
+  const isMobile = useMobile();
+  const { toast } = useToast();
+  const queryClient = useQueryClient();
 
-  const handleLogout = async () => {
-    await supabase.auth.signOut();
-    toast.success("Logged out successfully");
-    navigate("/");
+  const toggleMenu = () => {
+    setIsOpen(!isOpen);
   };
 
   const handleResetProgress = async () => {
     const user = await supabase.auth.getUser();
     if (!user.data.user) {
-      toast.error("You must be logged in to reset progress");
+      toast({
+        variant: "destructive",
+        title: "Error",
+        description: "You must be logged in to reset progress"
+      });
       return;
     }
 
@@ -37,11 +36,15 @@ export const Navigation = () => {
 
     if (error) {
       console.error("Error resetting progress:", error);
-      toast.error("Failed to reset progress");
+      toast({
+        variant: "destructive",
+        title: "Error",
+        description: "Failed to reset progress"
+      });
       return;
     }
 
-    // Reset XP and streak in profile
+    // Reset profile stats
     const { error: profileError } = await supabase
       .from('profiles')
       .update({
@@ -54,115 +57,92 @@ export const Navigation = () => {
 
     if (profileError) {
       console.error("Error resetting profile:", profileError);
-      toast.error("Failed to reset profile stats");
+      toast({
+        variant: "destructive",
+        title: "Error",
+        description: "Failed to reset profile stats"
+      });
       return;
     }
 
-    toast.success("Progress reset successfully");
-    window.location.reload(); // Refresh to show updated state
+    // Invalidate all queries to force a refresh of the data
+    await queryClient.invalidateQueries();
+
+    toast({
+      title: "Success",
+      description: "Progress has been reset"
+    });
   };
 
-  const menuItems = [
-    { icon: Home, label: "Home", path: "/" },
-    { icon: Book, label: "Lord's Days", path: "/lords-days" },
-    { icon: Trophy, label: "Leaderboard", path: "/leaderboard" },
+  const navItems = [
+    { to: "/", label: "Home" },
+    { to: "/lords-days", label: "Lord's Days" },
+    { to: "/leaderboard", label: "Leaderboard" },
+    { to: "/dashboard", label: "Dashboard" },
+    { to: "/profile", label: "Profile" },
   ];
 
+  const renderNavItems = () => (
+    <>
+      {navItems.map((item) => (
+        <Link
+          key={item.to}
+          to={item.to}
+          className="text-brand-600 hover:text-brand-900 px-3 py-2 rounded-md text-sm font-medium"
+          onClick={() => isMobile && setIsOpen(false)}
+        >
+          {item.label}
+        </Link>
+      ))}
+      <Button
+        variant="outline"
+        size="sm"
+        onClick={handleResetProgress}
+        className="ml-3"
+      >
+        <RefreshCw className="w-4 h-4 mr-2" />
+        Reset Progress
+      </Button>
+    </>
+  );
+
   return (
-    <nav className="fixed top-0 left-0 right-0 bg-white/80 backdrop-blur-md z-50 border-b border-gray-100">
+    <nav className="bg-white shadow-sm fixed w-full z-50">
       <div className="max-w-7xl mx-auto px-4">
-        <div className="flex justify-between items-center h-16">
-          <Link to="/" className="flex items-center space-x-2">
-            <span className="text-xl font-semibold text-brand-800">HC Memorize</span>
-          </Link>
-
-          {/* Desktop Navigation */}
-          <div className="hidden md:flex items-center space-x-8">
-            {menuItems.map((item) => (
-              <Link
-                key={item.label}
-                to={item.path}
-                className="flex items-center space-x-2 text-brand-600 hover:text-brand-800 transition-colors"
-              >
-                <item.icon size={18} />
-                <span>{item.label}</span>
-              </Link>
-            ))}
-            
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={handleResetProgress}
-              className="flex items-center space-x-2"
-            >
-              <RefreshCw size={16} />
-              <span>Reset Progress</span>
-            </Button>
-
-            <DropdownMenu>
-              <DropdownMenuTrigger className="flex items-center space-x-2 text-brand-600 hover:text-brand-800 transition-colors">
-                <User size={18} />
-                <span>Profile</span>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent>
-                <DropdownMenuItem onClick={() => navigate("/profile")}>
-                  Edit Profile
-                </DropdownMenuItem>
-                <DropdownMenuSeparator />
-                <DropdownMenuItem onClick={handleLogout}>
-                  Logout
-                </DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
-          </div>
-
-          {/* Mobile Menu Button */}
-          <button
-            onClick={() => setIsOpen(!isOpen)}
-            className="md:hidden p-2 rounded-md text-brand-600 hover:text-brand-800 hover:bg-gray-100"
-          >
-            <Menu size={24} />
-          </button>
-        </div>
-
-        {/* Mobile Navigation */}
-        {isOpen && (
-          <div className="md:hidden pb-4 animate-fade-in">
-            {menuItems.map((item) => (
-              <Link
-                key={item.label}
-                to={item.path}
-                className="flex items-center space-x-2 px-4 py-3 text-brand-600 hover:text-brand-800 hover:bg-gray-50 rounded-md"
-                onClick={() => setIsOpen(false)}
-              >
-                <item.icon size={18} />
-                <span>{item.label}</span>
-              </Link>
-            ))}
-            <button
-              onClick={handleResetProgress}
-              className="flex items-center space-x-2 w-full px-4 py-3 text-brand-600 hover:text-brand-800 hover:bg-gray-50 rounded-md"
-            >
-              <RefreshCw size={18} />
-              <span>Reset Progress</span>
-            </button>
-            <Link
-              to="/profile"
-              className="flex items-center space-x-2 px-4 py-3 text-brand-600 hover:text-brand-800 hover:bg-gray-50 rounded-md"
-              onClick={() => setIsOpen(false)}
-            >
-              <User size={18} />
-              <span>Profile</span>
+        <div className="flex justify-between h-16">
+          <div className="flex items-center">
+            <Link to="/" className="text-xl font-bold text-brand-900">
+              Heidelberg
             </Link>
-            <button
-              onClick={handleLogout}
-              className="flex items-center space-x-2 w-full px-4 py-3 text-brand-600 hover:text-brand-800 hover:bg-gray-50 rounded-md"
-            >
-              <LogOut size={18} />
-              <span>Logout</span>
-            </button>
           </div>
-        )}
+
+          {isMobile ? (
+            <>
+              <button
+                onClick={toggleMenu}
+                className="inline-flex items-center justify-center p-2 rounded-md text-brand-600 hover:text-brand-900 focus:outline-none"
+              >
+                {isOpen ? (
+                  <X className="h-6 w-6" />
+                ) : (
+                  <Menu className="h-6 w-6" />
+                )}
+              </button>
+
+              {isOpen && (
+                <div className="absolute top-16 left-0 right-0 bg-white shadow-lg">
+                  <div className="px-2 pt-2 pb-3 space-y-1">
+                    {renderNavItems()}
+                  </div>
+                </div>
+              )}
+            </>
+          ) : (
+            <div className="flex items-center">
+              {renderNavItems()}
+            </div>
+          )}
+        </div>
       </div>
     </nav>
   );
