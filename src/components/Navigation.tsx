@@ -19,6 +19,7 @@ export const Navigation = () => {
   useEffect(() => {
     // Get initial session
     supabase.auth.getSession().then(({ data: { session } }) => {
+      console.log("Session loaded:", session?.user?.id);
       setSession(session);
       if (session?.user) {
         checkAdminStatus(session.user.id);
@@ -29,6 +30,7 @@ export const Navigation = () => {
     const {
       data: { subscription },
     } = supabase.auth.onAuthStateChange((_event, session) => {
+      console.log("Auth state changed:", session?.user?.id);
       setSession(session);
       if (session?.user) {
         checkAdminStatus(session.user.id);
@@ -67,6 +69,7 @@ export const Navigation = () => {
     } else {
       setSession(null);
       setIsAdmin(false);
+      queryClient.clear();
       navigate('/auth');
       toast({
         title: "Success",
