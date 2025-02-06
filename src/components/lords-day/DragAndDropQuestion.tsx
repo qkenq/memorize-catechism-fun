@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import type { DragAndDropAnswer } from "@/data/catechism/questionTypes";
-import { DragDropContext } from "@hello-pangea/dnd";
+import { DragDropContext, Droppable } from "@hello-pangea/dnd";
 import { DraggableSegment } from "./DraggableSegment";
 import { DroppableGap } from "./DroppableGap";
 
