@@ -26,21 +26,22 @@ export const GapDropZone = ({
           onMouseEnter={() => setIsHovered(true)}
           onMouseLeave={() => setIsHovered(false)}
           className={cn(
-            "inline-block min-w-[100px] px-2 py-1 mx-1 border-b-2 transition-all",
-            content ? "border-transparent" : "border-brand-300",
-            snapshot.isDraggingOver && "border-brand-500 bg-brand-50",
-            isHovered && !content && "border-brand-400",
+            "inline-flex items-center min-w-[3ch] h-[1.5em] mx-1 relative",
+            "before:content-[''] before:absolute before:inset-x-0 before:bottom-0 before:h-[2px]",
+            content ? "before:bg-transparent" : "before:bg-brand-300",
+            snapshot.isDraggingOver && "before:bg-brand-500",
+            isHovered && !content && "before:bg-brand-400",
             showFeedback && content && (
               isCorrect 
-                ? "text-green-600 bg-green-50" 
-                : "text-red-600 bg-red-50 animate-shake"
+                ? "text-green-600" 
+                : "text-red-600 animate-shake"
             )
           )}
         >
           {content ? (
-            <span className="text-brand-700">{content}</span>
+            <span className="text-inherit">{content}</span>
           ) : (
-            <span className="text-brand-300 text-sm">_____</span>
+            <span className="text-brand-300 text-sm invisible">gap</span>
           )}
           {provided.placeholder}
         </span>

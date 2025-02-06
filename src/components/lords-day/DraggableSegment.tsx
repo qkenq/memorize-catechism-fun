@@ -14,12 +14,12 @@ export const DraggableSegment = ({ segment, index }: DraggableSegmentProps) => {
           ref={provided.innerRef}
           {...provided.draggableProps}
           {...provided.dragHandleProps}
-          className={`flex items-center gap-2 p-4 ${
-            snapshot.isDragging ? 'bg-sage-200' : 'bg-sage-100'
-          } border border-sage-200 rounded-lg shadow-sm cursor-move hover:bg-sage-200 transition-colors group`}
+          className={`inline-flex items-center gap-2 px-3 py-1.5 ${
+            snapshot.isDragging ? 'bg-sage-100 shadow-lg' : 'bg-transparent'
+          } rounded-md cursor-move hover:bg-sage-50 transition-all group border border-transparent hover:border-sage-200`}
         >
-          <GripVertical className="h-5 w-5 text-sage-500 group-hover:text-sage-600" />
-          <span className="text-sage-800">{segment}</span>
+          <GripVertical className="h-4 w-4 text-sage-400 group-hover:text-sage-500" />
+          <span className="text-sage-700">{segment}</span>
         </div>
       )}
     </Draggable>
