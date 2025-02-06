@@ -72,7 +72,6 @@ const LordsDay = () => {
     enabled: !!userId,
   });
 
-  // Show loading state
   if (isLoading) {
     return (
       <div className="min-h-screen bg-gradient-to-b from-brand-50 to-white">
@@ -84,13 +83,11 @@ const LordsDay = () => {
     );
   }
 
-  // Check for invalid Lord's Day ID
   if (!lordsDay) {
     console.log("Invalid Lord's Day ID:", id);
     return <Navigate to="/lords-days" replace />;
   }
 
-  // Check for authentication
   if (!userId) {
     console.log("No user ID found, redirecting to auth");
     return <Navigate to="/auth" replace />;
@@ -112,14 +109,17 @@ const LordsDay = () => {
       .from('progress')
       .upsert({
         lords_day_id: lordsDay.id,
+        user_id: userId,
         score: averageScore,
         level: 1,
-        user_id: userId,
         total_time_spent: (progress?.total_time_spent || 0) + timeSpent,
         last_attempt_date: new Date().toISOString()
+      }, {
+        onConflict: 'user_id,lords_day_id'
       });
 
     if (error) {
+      console.error("Error updating progress:", error);
       toast({
         title: "Error",
         description: "Failed to save progress",
