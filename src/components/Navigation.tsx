@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { Menu, X, RefreshCw, Shield, LogOut } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -6,31 +6,55 @@ import { useIsMobile } from "@/hooks/use-mobile";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/components/ui/use-toast";
 import { useQueryClient } from "@tanstack/react-query";
-import { useEffect } from "react";
 
 export const Navigation = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [isAdmin, setIsAdmin] = useState(false);
+  const [session, setSession] = useState<any>(null);
   const isMobile = useIsMobile();
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const navigate = useNavigate();
 
   useEffect(() => {
-    const checkAdminStatus = async () => {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (user) {
-        const { data } = await supabase
-          .from('profiles')
-          .select('role')
-          .eq('id', user.id)
-          .single();
-        console.log("User role:", data?.role); // Debug log
-        setIsAdmin(data?.role === 'admin');
+    // Get initial session
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      setSession(session);
+      if (session?.user) {
+        checkAdminStatus(session.user.id);
       }
-    };
-    checkAdminStatus();
+    });
+
+    // Listen for auth changes
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange((_event, session) => {
+      setSession(session);
+      if (session?.user) {
+        checkAdminStatus(session.user.id);
+      } else {
+        setIsAdmin(false);
+      }
+    });
+
+    return () => subscription.unsubscribe();
   }, []);
+
+  const checkAdminStatus = async (userId: string) => {
+    const { data, error } = await supabase
+      .from('profiles')
+      .select('role')
+      .eq('id', userId)
+      .single();
+    
+    if (error) {
+      console.error("Error checking admin status:", error);
+      return;
+    }
+    
+    console.log("User role:", data?.role);
+    setIsAdmin(data?.role === 'admin');
+  };
 
   const handleLogout = async () => {
     const { error } = await supabase.auth.signOut();
@@ -41,6 +65,8 @@ export const Navigation = () => {
         description: "Failed to log out"
       });
     } else {
+      setSession(null);
+      setIsAdmin(false);
       navigate('/auth');
       toast({
         title: "Success",
@@ -49,13 +75,8 @@ export const Navigation = () => {
     }
   };
 
-  const toggleMenu = () => {
-    setIsOpen(!isOpen);
-  };
-
   const handleResetProgress = async () => {
-    const user = await supabase.auth.getUser();
-    if (!user.data.user) {
+    if (!session?.user) {
       toast({
         variant: "destructive",
         title: "Error",
@@ -64,11 +85,10 @@ export const Navigation = () => {
       return;
     }
 
-    // Delete all progress records for the current user
     const { error } = await supabase
       .from('progress')
       .delete()
-      .eq('user_id', user.data.user.id);
+      .eq('user_id', session.user.id);
 
     if (error) {
       console.error("Error resetting progress:", error);
@@ -80,7 +100,6 @@ export const Navigation = () => {
       return;
     }
 
-    // Reset profile stats
     const { error: profileError } = await supabase
       .from('profiles')
       .update({
@@ -89,7 +108,7 @@ export const Navigation = () => {
         last_activity_date: null,
         level: 1
       })
-      .eq('id', user.data.user.id);
+      .eq('id', session.user.id);
 
     if (profileError) {
       console.error("Error resetting profile:", profileError);
@@ -101,7 +120,6 @@ export const Navigation = () => {
       return;
     }
 
-    // Invalidate all queries to force a refresh of the data
     await queryClient.invalidateQueries();
 
     toast({
@@ -114,8 +132,10 @@ export const Navigation = () => {
     { to: "/", label: "Home" },
     { to: "/lords-days", label: "Lord's Days" },
     { to: "/leaderboard", label: "Leaderboard" },
-    { to: "/dashboard", label: "Dashboard" },
-    { to: "/profile", label: "Profile" },
+    ...(session ? [
+      { to: "/dashboard", label: "Dashboard" },
+      { to: "/profile", label: "Profile" },
+    ] : []),
     ...(isAdmin ? [{ to: "/quiz-management", label: "Admin", icon: Shield }] : []),
   ];
 
@@ -132,24 +152,28 @@ export const Navigation = () => {
           {item.label}
         </Link>
       ))}
-      <Button
-        variant="outline"
-        size="sm"
-        onClick={handleResetProgress}
-        className="ml-3"
-      >
-        <RefreshCw className="w-4 h-4 mr-2" />
-        Reset Progress
-      </Button>
-      <Button
-        variant="ghost"
-        size="sm"
-        onClick={handleLogout}
-        className="ml-3"
-      >
-        <LogOut className="w-4 h-4 mr-2" />
-        Logout
-      </Button>
+      {session && (
+        <>
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={handleResetProgress}
+            className="ml-3"
+          >
+            <RefreshCw className="w-4 h-4 mr-2" />
+            Reset Progress
+          </Button>
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={handleLogout}
+            className="ml-3"
+          >
+            <LogOut className="w-4 h-4 mr-2" />
+            Logout
+          </Button>
+        </>
+      )}
     </>
   );
 
@@ -166,7 +190,7 @@ export const Navigation = () => {
           {isMobile ? (
             <>
               <button
-                onClick={toggleMenu}
+                onClick={() => setIsOpen(!isOpen)}
                 className="inline-flex items-center justify-center p-2 rounded-md text-brand-600 hover:text-brand-900 focus:outline-none"
               >
                 {isOpen ? (
