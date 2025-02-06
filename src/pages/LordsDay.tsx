@@ -213,6 +213,8 @@ const LordsDay = () => {
               onSelfScore={handleSelfScore}
               userLevel={userProfile?.level || 1}
               currentRound={currentRound}
+              questionNumber={currentQuestionIndex + 1}
+              totalQuestions={lordsDay.questions.length}
             />
           ) : (
             <CompletionCard onStudyAgain={handleStudyAgain} />
