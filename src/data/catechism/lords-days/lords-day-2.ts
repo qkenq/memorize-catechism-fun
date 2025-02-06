@@ -10,7 +10,8 @@ export const lordsDay2: LordsDay = {
       answer: "From the law of God.",
       type: "dragAndDrop",
       dragAndDropData: {
-        segments: ["From the law of God."],
+        visibleParts: ["From the law"],
+        segments: ["of God."],
         correctOrder: [0]
       }
     },
@@ -20,10 +21,15 @@ export const lordsDay2: LordsDay = {
       answer: "Christ teaches us this in a summary in Matthew 22: Love the Lord your God with all your heart and with all your soul and with all your mind. This is the first and greatest commandment. And the second is like it: Love your neighbor as yourself. All the Law and the Prophets hang on these two commandments.",
       type: "dragAndDrop",
       dragAndDropData: {
+        visibleParts: [
+          "Christ teaches us this in a summary in Matthew 22:",
+          "This is the first and",
+          "And the second is"
+        ],
         segments: [
-          "Christ teaches us this in a summary in Matthew 22: Love the Lord your God with all your heart and with all your soul and with all your mind.",
-          "This is the first and greatest commandment.",
-          "And the second is like it: Love your neighbor as yourself.",
+          "Love the Lord your God with all your heart and with all your soul and with all your mind.",
+          "greatest commandment.",
+          "like it: Love your neighbor as yourself.",
           "All the Law and the Prophets hang on these two commandments."
         ],
         correctOrder: [0, 1, 2, 3]
@@ -35,7 +41,8 @@ export const lordsDay2: LordsDay = {
       answer: "No, I am inclined by nature to hate God and my neighbor.",
       type: "dragAndDrop",
       dragAndDropData: {
-        segments: ["No, I am inclined by nature to hate God and my neighbor."],
+        visibleParts: ["No, I am inclined by nature to"],
+        segments: ["hate God and my neighbor."],
         correctOrder: [0]
       }
     }
