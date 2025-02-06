@@ -1,15 +1,6 @@
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { Eye, PlayCircle, Pencil, Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
 import {
   Dialog,
   DialogContent,
@@ -25,6 +16,9 @@ import {
 import { QuizPreview } from "@/components/quiz-preview/QuizPreview";
 import { QuizEditor } from "@/components/quiz-editor/QuizEditor";
 import { LessonEditor } from "@/components/lesson-editor/LessonEditor";
+import { QuizList } from "@/components/quiz-management/QuizList";
+import { LessonList } from "@/components/quiz-management/LessonList";
+import { QuizDataPreview } from "@/components/quiz-management/QuizDataPreview";
 import { supabase } from "@/integrations/supabase/client";
 
 export default function QuizManagement() {
@@ -33,7 +27,6 @@ export default function QuizManagement() {
   const [editingQuiz, setEditingQuiz] = useState<any>(null);
   const [editingLesson, setEditingLesson] = useState<any>(null);
 
-  // Fetch quizzes
   const { data: quizzes, isLoading: quizzesLoading, refetch: refetchQuizzes } = useQuery({
     queryKey: ['quizzes'],
     queryFn: async () => {
@@ -47,7 +40,6 @@ export default function QuizManagement() {
     },
   });
 
-  // Fetch lessons
   const { data: lessons, isLoading: lessonsLoading, refetch: refetchLessons } = useQuery({
     queryKey: ['lessons'],
     queryFn: async () => {
@@ -61,20 +53,19 @@ export default function QuizManagement() {
     },
   });
 
-  const QuizDataPreview = ({ quiz }: { quiz: any }) => {
-    return (
-      <div className="space-y-4">
-        <h3 className="font-medium">Content:</h3>
-        <p className="whitespace-pre-wrap">{quiz.full_text || quiz.visible_text.join('\n')}</p>
-        
-        <h3 className="font-medium">Gaps:</h3>
-        <ul className="list-disc pl-6">
-          {(quiz.gaps || quiz.gap_text).map((gap: any, index: number) => (
-            <li key={index}>{typeof gap === 'string' ? gap : gap.answer}</li>
-          ))}
-        </ul>
-      </div>
-    );
+  const handlePreviewQuiz = (quiz: any, studentView: boolean) => {
+    setPreviewQuiz(quiz);
+    setShowStudentPreview(studentView);
+  };
+
+  const handleEditQuiz = (quiz: any) => {
+    setEditingQuiz(quiz);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
+  const handleEditLesson = (lesson: any) => {
+    setEditingLesson(lesson);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
   return (
@@ -88,7 +79,6 @@ export default function QuizManagement() {
         </TabsList>
 
         <TabsContent value="quizzes" className="space-y-8">
-          {/* Create/Edit Quiz Form */}
           <div className="bg-card p-6 rounded-lg border">
             <h2 className="text-xl font-semibold mb-4">
               {editingQuiz ? "Edit Quiz" : "Create New Quiz"}
@@ -111,71 +101,18 @@ export default function QuizManagement() {
             )}
           </div>
 
-          {/* Quiz List */}
-          <div className="bg-card p-6 rounded-lg border">
-            <h2 className="text-xl font-semibold mb-4">Created Quizzes</h2>
-            {quizzesLoading ? (
-              <p>Loading quizzes...</p>
-            ) : (
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>Title</TableHead>
-                    <TableHead>Type</TableHead>
-                    <TableHead>Created At</TableHead>
-                    <TableHead className="w-[180px]">Actions</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {quizzes?.map((quiz) => (
-                    <TableRow key={quiz.id}>
-                      <TableCell>{quiz.title}</TableCell>
-                      <TableCell>{quiz.type}</TableCell>
-                      <TableCell>{new Date(quiz.created_at).toLocaleDateString()}</TableCell>
-                      <TableCell>
-                        <div className="flex gap-2">
-                          <Button
-                            variant="ghost"
-                            size="icon"
-                            onClick={() => {
-                              setPreviewQuiz(quiz);
-                              setShowStudentPreview(false);
-                            }}
-                          >
-                            <Eye className="h-4 w-4" />
-                          </Button>
-                          <Button
-                            variant="ghost"
-                            size="icon"
-                            onClick={() => {
-                              setPreviewQuiz(quiz);
-                              setShowStudentPreview(true);
-                            }}
-                          >
-                            <PlayCircle className="h-4 w-4" />
-                          </Button>
-                          <Button
-                            variant="ghost"
-                            size="icon"
-                            onClick={() => {
-                              setEditingQuiz(quiz);
-                              window.scrollTo({ top: 0, behavior: 'smooth' });
-                            }}
-                          >
-                            <Pencil className="h-4 w-4" />
-                          </Button>
-                        </div>
-                      </TableCell>
-                    </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
-            )}
-          </div>
+          {quizzesLoading ? (
+            <p>Loading quizzes...</p>
+          ) : (
+            <QuizList 
+              quizzes={quizzes || []}
+              onPreview={handlePreviewQuiz}
+              onEdit={handleEditQuiz}
+            />
+          )}
         </TabsContent>
 
         <TabsContent value="lessons" className="space-y-8">
-          {/* Create/Edit Lesson Form */}
           <div className="bg-card p-6 rounded-lg border">
             <h2 className="text-xl font-semibold mb-4">
               {editingLesson ? "Edit Lesson" : "Create New Lesson"}
@@ -198,47 +135,17 @@ export default function QuizManagement() {
             )}
           </div>
 
-          {/* Lesson List */}
-          <div className="bg-card p-6 rounded-lg border">
-            <h2 className="text-xl font-semibold mb-4">Created Lessons</h2>
-            {lessonsLoading ? (
-              <p>Loading lessons...</p>
-            ) : (
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>Title</TableHead>
-                    <TableHead>Created At</TableHead>
-                    <TableHead className="w-[100px]">Actions</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {lessons?.map((lesson) => (
-                    <TableRow key={lesson.id}>
-                      <TableCell>{lesson.title}</TableCell>
-                      <TableCell>{new Date(lesson.created_at).toLocaleDateString()}</TableCell>
-                      <TableCell>
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          onClick={() => {
-                            setEditingLesson(lesson);
-                            window.scrollTo({ top: 0, behavior: 'smooth' });
-                          }}
-                        >
-                          <Pencil className="h-4 w-4" />
-                        </Button>
-                      </TableCell>
-                    </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
-            )}
-          </div>
+          {lessonsLoading ? (
+            <p>Loading lessons...</p>
+          ) : (
+            <LessonList 
+              lessons={lessons || []}
+              onEdit={handleEditLesson}
+            />
+          )}
         </TabsContent>
       </Tabs>
 
-      {/* Preview Dialog */}
       <Dialog open={!!previewQuiz} onOpenChange={() => setPreviewQuiz(null)}>
         <DialogContent className="max-w-4xl">
           <DialogHeader>
