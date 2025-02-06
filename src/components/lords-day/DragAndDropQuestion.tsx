@@ -34,7 +34,7 @@ export const DragAndDropQuestion = ({
         const oneThirdLength = Math.floor(words.length / 3);
         return words.slice(oneThirdLength).join(' ');
       });
-      return [...round2Segments, ...answerData.segments];
+      return [...round2Segments];
     }
     // For round 1, only the original segments are draggable
     return [...answerData.segments];
@@ -61,8 +61,8 @@ export const DragAndDropQuestion = ({
       // For round 3, everything needs a gap
       return answerData.visibleParts.length + answerData.segments.length;
     } else if (currentRound === 2) {
-      // For round 2, we need gaps for the 2/3 parts of visible text plus original segments
-      return answerData.visibleParts.length + answerData.segments.length;
+      // For round 2, we need gaps for the 2/3 parts of visible text
+      return answerData.visibleParts.length;
     }
     // For round 1, only segment spaces need gaps
     return answerData.segments.length;
