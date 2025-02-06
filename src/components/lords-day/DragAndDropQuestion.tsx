@@ -24,24 +24,46 @@ export const DragAndDropQuestion = ({
   const handleDragEnd = (result: any) => {
     if (!result.destination) return;
 
-    const sourceIndex = result.source.index;
-    const destinationIndex = parseInt(result.destination.droppableId.split('-')[1]);
+    const { source, destination } = result;
+    
+    // If dropping into a gap
+    if (destination.droppableId.startsWith('gap-')) {
+      const gapIndex = parseInt(destination.droppableId.split('-')[1]);
+      
+      // If the gap already has a segment, prevent the drop
+      if (droppedSegments[gapIndex] !== null) {
+        return;
+      }
 
-    // Update the dropped segments array
-    const newDroppedSegments = [...droppedSegments];
-    newDroppedSegments[destinationIndex] = segments[sourceIndex];
+      // Get the segment being dragged
+      const draggedSegment = segments[source.index];
+      
+      // Check if this is the correct position for this segment
+      const isCorrectPosition = gapIndex === answerData.correctOrder.findIndex(
+        index => answerData.segments[index] === draggedSegment
+      );
 
-    // Remove the segment from the available segments
-    const newSegments = segments.filter((_, index) => index !== sourceIndex);
+      // If it's not the correct position, don't allow the drop
+      if (!isCorrectPosition) {
+        return;
+      }
 
-    setDroppedSegments(newDroppedSegments);
-    setSegments(newSegments);
+      // Update the dropped segments array
+      const newDroppedSegments = [...droppedSegments];
+      newDroppedSegments[gapIndex] = draggedSegment;
+
+      // Remove the segment from the available segments
+      const newSegments = segments.filter((_, index) => index !== source.index);
+
+      setDroppedSegments(newDroppedSegments);
+      setSegments(newSegments);
+    }
   };
 
   const handleSubmit = () => {
     // Check if all segments have been placed
     if (droppedSegments.includes(null)) {
-      return; // Don't submit if not all segments are placed
+      return;
     }
 
     const isCorrect = droppedSegments.every(
