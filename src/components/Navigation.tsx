@@ -25,6 +25,7 @@ export const Navigation = () => {
           .select('role')
           .eq('id', user.id)
           .single();
+        console.log("User role:", data?.role); // Debug log
         setIsAdmin(data?.role === 'admin');
       }
     };
