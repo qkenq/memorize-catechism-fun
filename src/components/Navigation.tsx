@@ -23,10 +23,17 @@ export const Navigation = () => {
   };
 
   const handleResetProgress = async () => {
+    const user = await supabase.auth.getUser();
+    if (!user.data.user) {
+      toast.error("You must be logged in to reset progress");
+      return;
+    }
+
+    // Delete all progress records for the current user
     const { error } = await supabase
       .from('progress')
       .delete()
-      .neq('id', ''); // Delete all records
+      .eq('user_id', user.data.user.id);
 
     if (error) {
       console.error("Error resetting progress:", error);
@@ -43,7 +50,7 @@ export const Navigation = () => {
         last_activity_date: null,
         level: 1
       })
-      .eq('id', (await supabase.auth.getUser()).data.user?.id);
+      .eq('id', user.data.user.id);
 
     if (profileError) {
       console.error("Error resetting profile:", profileError);
