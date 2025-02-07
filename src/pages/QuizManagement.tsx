@@ -54,8 +54,9 @@ export default function QuizManagement() {
   });
 
   const handlePreviewQuiz = (quiz: any, studentView: boolean) => {
-    setPreviewQuiz(quiz);
-    setShowStudentPreview(studentView);
+    // Open preview in new tab
+    const previewUrl = `/quiz-preview/${quiz.id}?mode=${studentView ? 'student' : 'teacher'}`;
+    window.open(previewUrl, '_blank');
   };
 
   const handleEditQuiz = (quiz: any) => {

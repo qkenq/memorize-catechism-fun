@@ -16,39 +16,53 @@ interface QuizPreviewProps {
 }
 
 export const QuizPreview = ({ quiz }: QuizPreviewProps) => {
+  console.log('Quiz data:', quiz);
+  console.log('Visible text:', quiz.visible_text);
+  console.log('Gap text:', quiz.gap_text);
+
   const [segments, setSegments] = useState(quiz.gap_text);
   const [droppedSegments, setDroppedSegments] = useState<(string | null)[]>(
     new Array(quiz.gap_text.length).fill(null)
   );
   const [showFeedback, setShowFeedback] = useState(false);
 
+  // Calculate max width based on longest phrase
+  const maxPhraseLength = Math.max(...quiz.gap_text.map(text => text.length));
+  // Add some padding for the container
+  const gapWidth = Math.max(150, maxPhraseLength * 10 + 32); // 10px per character + 32px padding
+
   const handleDragEnd = (result: any) => {
     if (!result.destination) return;
 
     const { source, destination } = result;
     
-    if (destination.droppableId.startsWith('gap-')) {
-      const gapIndex = parseInt(destination.droppableId.split('-')[1]);
-      
-      if (droppedSegments[gapIndex] !== null) {
-        toast({
-          title: "Gap already filled",
-          description: "Please drag to an empty gap.",
-          variant: "destructive",
-        });
-        return;
-      }
-
-      const draggedSegment = segments[source.index];
-      const newDroppedSegments = [...droppedSegments];
-      newDroppedSegments[gapIndex] = draggedSegment;
-
-      const newSegments = segments.filter((_, index) => index !== source.index);
-
-      setDroppedSegments(newDroppedSegments);
-      setSegments(newSegments);
-      setShowFeedback(false);
+    // Get the gap index from the destination
+    const gapIndex = parseInt(destination.droppableId.split('-')[1]);
+    
+    // Don't allow dropping if gap is already filled
+    if (droppedSegments[gapIndex] !== null) {
+      toast({
+        title: "Gap already filled",
+        description: "Please drag to an empty gap.",
+        variant: "destructive",
+      });
+      return;
     }
+
+    // Get the dragged segment
+    const draggedSegment = segments[source.index];
+    
+    // Update dropped segments
+    const newDroppedSegments = [...droppedSegments];
+    newDroppedSegments[gapIndex] = draggedSegment;
+    
+    // Remove from available segments
+    const newSegments = [...segments];
+    newSegments.splice(source.index, 1);
+
+    setDroppedSegments(newDroppedSegments);
+    setSegments(newSegments);
+    setShowFeedback(false);
   };
 
   const handleSubmit = () => {
@@ -82,25 +96,54 @@ export const QuizPreview = ({ quiz }: QuizPreviewProps) => {
   };
 
   const renderTextWithGaps = (text: string, gapIndexOffset: number) => {
-    const parts = text.split('_____');
-    return parts.map((part, index) => (
-      <span key={index}>
-        {part}
-        {index < parts.length - 1 && (
-          <GapDropZone
-            index={gapIndexOffset + index}
-            content={droppedSegments[gapIndexOffset + index]}
-            isCorrect={showFeedback && droppedSegments[gapIndexOffset + index] === quiz.gap_text[gapIndexOffset + index]}
-            showFeedback={showFeedback}
-          />
-        )}
-      </span>
-    ));
+    // Split text into lines first
+    const lines = text.split('\n');
+    const elements: React.ReactNode[] = [];
+    let gapIndex = 0;
+
+    lines.forEach((line, lineIndex) => {
+      // Split on _____ pattern
+      const parts = line.split('_____');
+      
+      parts.forEach((part, partIndex) => {
+        // Add the text part
+        if (part) {
+          elements.push(<span key={`text-${lineIndex}-${partIndex}`}>{part}</span>);
+        }
+        
+        // Add gap after each part except the last
+        if (partIndex < parts.length - 1) {
+          elements.push(
+            <GapDropZone
+              key={`gap-${gapIndexOffset + gapIndex}`}
+              index={gapIndexOffset + gapIndex}
+              content={droppedSegments[gapIndexOffset + gapIndex]}
+              isCorrect={showFeedback && droppedSegments[gapIndexOffset + gapIndex] === quiz.gap_text[gapIndexOffset + gapIndex]}
+              showFeedback={showFeedback}
+              width={gapWidth}
+            />
+          );
+          gapIndex++;
+        }
+      });
+
+      // Add line break after each line except the last
+      if (lineIndex < lines.length - 1) {
+        elements.push(<br key={`br-${lineIndex}`} />);
+      }
+    });
+
+    return <>{elements}</>;
+  };
+
+  // Update gap count calculation to work with line breaks
+  const getGapCount = (text: string) => {
+    return (text.match(/\[\[.*?\]\]/g) || []).length;
   };
 
   return (
-    <div className="space-y-6 p-6 animate-fade-in">
-      <h2 className="text-xl font-semibold text-brand-800">{quiz.title}</h2>
+    <div className="px-4 md:px-6 animate-fade-in">
+      <h2 className="text-xl font-semibold text-brand-800 mb-6">{quiz.title}</h2>
       
       <DragDropContext onDragEnd={handleDragEnd}>
         <div className="grid gap-8">
@@ -109,7 +152,7 @@ export const QuizPreview = ({ quiz }: QuizPreviewProps) => {
             {quiz.visible_text.map((part, partIndex) => {
               const gapIndexOffset = partIndex > 0 
                 ? quiz.visible_text.slice(0, partIndex).reduce(
-                    (acc, text) => acc + (text.match(/_____/g) || []).length, 
+                    (acc, text) => acc + getGapCount(text), 
                     0
                   ) 
                 : 0;
@@ -117,10 +160,7 @@ export const QuizPreview = ({ quiz }: QuizPreviewProps) => {
               return (
                 <div 
                   key={partIndex}
-                  className={cn(
-                    "p-4 bg-white border border-brand-200 rounded-lg shadow-sm",
-                    "transition-all duration-300"
-                  )}
+                  className="p-4 bg-white border border-brand-200 rounded-lg shadow-sm"
                 >
                   {renderTextWithGaps(part, gapIndexOffset)}
                 </div>
@@ -132,12 +172,12 @@ export const QuizPreview = ({ quiz }: QuizPreviewProps) => {
           {segments.length > 0 && (
             <div className="animate-fade-in">
               <h3 className="font-medium text-brand-800 mb-4">Available phrases:</h3>
-              <Droppable droppableId="available-segments">
+              <Droppable droppableId="available-segments" direction="horizontal">
                 {(provided) => (
                   <div
                     {...provided.droppableProps}
                     ref={provided.innerRef}
-                    className="space-y-3"
+                    className="flex flex-wrap gap-3"
                   >
                     {segments.map((segment, index) => (
                       <DraggableSegment 
@@ -155,7 +195,7 @@ export const QuizPreview = ({ quiz }: QuizPreviewProps) => {
         </div>
       </DragDropContext>
 
-      <div className="flex gap-4">
+      <div className="flex gap-4 mt-8">
         <Button 
           onClick={handleSubmit}
           className="flex-1"

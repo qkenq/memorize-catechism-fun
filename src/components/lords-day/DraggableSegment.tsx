@@ -1,4 +1,3 @@
-import { GripVertical } from "lucide-react";
 import { Draggable } from "@hello-pangea/dnd";
 
 interface DraggableSegmentProps {
@@ -8,24 +7,17 @@ interface DraggableSegmentProps {
 
 export const DraggableSegment = ({ segment, index }: DraggableSegmentProps) => {
   return (
-    <Draggable key={segment} draggableId={segment} index={index}>
+    <Draggable draggableId={`draggable-${index}`} index={index}>
       {(provided, snapshot) => (
         <div
           ref={provided.innerRef}
           {...provided.draggableProps}
           {...provided.dragHandleProps}
-          className={`inline-flex items-center whitespace-nowrap ${
-            snapshot.isDragging ? 'bg-sage-100 shadow-sm' : 'bg-transparent'
-          } rounded cursor-move hover:bg-sage-50 transition-colors`}
-          style={{
-            ...provided.draggableProps.style,
-            transform: snapshot.isDragging 
-              ? provided.draggableProps.style?.transform 
-              : 'none',
-          }}
+          className={`p-2 border ${
+            snapshot.isDragging ? 'border-brand-400 shadow-md' : 'border-brand-300'
+          } rounded cursor-move hover:bg-brand-50 transition-colors bg-white`}
         >
-          <GripVertical className="h-4 w-4 text-sage-400 hover:text-sage-600 mr-1" />
-          <span className="text-sage-700 py-0.5">{segment}</span>
+          <span className="text-brand-700">{segment}</span>
         </div>
       )}
     </Draggable>

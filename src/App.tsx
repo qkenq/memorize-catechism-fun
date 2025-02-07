@@ -12,6 +12,7 @@ import Auth from "./pages/Auth";
 import Dashboard from "./pages/Dashboard";
 import Profile from "./pages/Profile";
 import QuizManagement from "./pages/QuizManagement";
+import QuizPreviewPage from "@/pages/QuizPreviewPage";
 import { useEffect, useState } from "react";
 import { supabase } from "./integrations/supabase/client";
 
@@ -109,6 +110,7 @@ function App() {
                 </ProtectedRoute>
               }
             />
+            <Route path="/quiz-preview/:id" element={<QuizPreviewPage />} />
           </Routes>
           <Toaster />
           <Sonner />
