@@ -42,8 +42,7 @@ export const QuizEditor = ({ quiz, onQuizCreated }: QuizEditorProps) => {
     }
     
     return {
-      visible_text: [text],
-      gap_text: gaps.map(g => g.answer),
+      extracted_text: text.replace(gapRegex, '_____'),
       gaps
     };
   };
@@ -58,7 +57,7 @@ export const QuizEditor = ({ quiz, onQuizCreated }: QuizEditorProps) => {
         throw new Error("User not authenticated");
       }
 
-      const processed = processGaps(content);
+      const { extracted_text, gaps } = processGaps(content);
 
       if (quiz) {
         // Update existing quiz
@@ -67,10 +66,10 @@ export const QuizEditor = ({ quiz, onQuizCreated }: QuizEditorProps) => {
           .update({
             title,
             full_text: content,
-            gaps: processed.gaps,
+            gaps,
             type: "fill_in_blank",
-            visible_text: processed.visible_text,
-            gap_text: processed.gap_text,
+            visible_text: [extracted_text],
+            gap_text: gaps.map(g => g.answer),
             updated_at: new Date().toISOString()
           })
           .eq('id', quiz.id);
@@ -86,10 +85,10 @@ export const QuizEditor = ({ quiz, onQuizCreated }: QuizEditorProps) => {
         const { error } = await supabase.from("quizzes").insert({
           title,
           full_text: content,
-          gaps: processed.gaps,
+          gaps,
           type: "fill_in_blank",
-          visible_text: processed.visible_text,
-          gap_text: processed.gap_text,
+          visible_text: [extracted_text],
+          gap_text: gaps.map(g => g.answer),
           created_by: user.id
         });
 
